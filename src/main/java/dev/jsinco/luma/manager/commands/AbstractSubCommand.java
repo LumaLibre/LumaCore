@@ -1,12 +1,11 @@
 package dev.jsinco.luma.manager.commands;
 
-import dev.jsinco.luma.manager.modules.LumaModule;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.List;
 
-public interface AbstractSubCommand<P extends JavaPlugin> extends LumaModule {
+public interface AbstractSubCommand<P extends JavaPlugin> {
 
 
     boolean execute(P plugin, CommandSender sender, String label, String[] args);

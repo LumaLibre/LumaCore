@@ -1,7 +1,6 @@
 package dev.jsinco.luma.manager.commands;
 
 import com.google.common.collect.ImmutableList;
-import dev.jsinco.luma.manager.modules.LumaModule;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.defaults.BukkitCommand;
 import org.bukkit.entity.Player;
@@ -13,7 +12,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public abstract class AbstractCommand extends BukkitCommand implements LumaModule {
+public abstract class AbstractCommand extends BukkitCommand {
 
     private static final String HOLDER = "holder";
 

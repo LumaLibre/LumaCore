@@ -1,14 +1,17 @@
+import org.apache.commons.io.output.ByteArrayOutputStream
 import org.apache.tools.ant.filters.ReplaceTokens
+import java.nio.charset.Charset
 
 plugins {
     id("java")
+    id("maven-publish")
     kotlin("jvm")
     id("com.gradleup.shadow") version("8.3.5")
     id("io.papermc.paperweight.userdev") version("1.7.5")
 }
 
 group = "dev.jsinco.luma"
-version = "paper-1.21.3"
+version = getGitCommitHashShort()
 
 val jdkVersion: Int = 21
 val charset: String = "UTF-8"
@@ -45,8 +48,11 @@ tasks {
                 "${projectDir}${File.separator}build${File.separator}libs${File.separator}${project.name}.jar"
             )
         )
+
+
     }
     shadowJar {
+
         archiveClassifier.set("")
     }
     processResources {
@@ -61,7 +67,6 @@ tasks {
         options.encoding = charset
     }
     jar {
-        version = ""
         enabled = false
     }
 }
@@ -72,4 +77,41 @@ kotlin {
 
 java {
     toolchain.languageVersion = JavaLanguageVersion.of(jdkVersion)
+}
+
+publishing {
+    repositories {
+        maven {
+            name = "jsinco-repo"
+            url = uri("https://repo.jsinco.dev/releases")
+            credentials(PasswordCredentials::class) {
+                // get from environment
+                username = System.getenv("repo_username")
+                password = System.getenv("repo_secret")
+            }
+            authentication {
+                create<BasicAuthentication>("basic")
+            }
+        }
+    }
+    publications {
+        create<MavenPublication>("maven") {
+            groupId = project.group.toString()
+            artifactId = project.name
+            version = project.version.toString()
+            artifact(tasks.shadowJar.get().archiveFile) {
+                builtBy(tasks.shadowJar)
+            }
+        }
+    }
+}
+
+fun getGitCommitHashShort(): String = ByteArrayOutputStream().use { stream ->
+    var branch = "none"
+    project.exec {
+        commandLine = listOf("git", "log", "-1", "--format=%h")
+        standardOutput = stream
+    }
+    if (stream.size() > 0) branch = stream.toString(Charset.defaultCharset().name()).trim()
+    return branch
 }
