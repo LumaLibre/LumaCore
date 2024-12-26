@@ -23,8 +23,8 @@ import java.util.Set;
 public class ModuleManager {
 
     private final String fallbackPrefix = "lumacore";
-    private final List<LumaModule> modules = new ArrayList<>();
-    private final Map<AbstractCommandManager, List<AbstractSubCommand>> mappedCommands = new HashMap<>();
+    private final List<Object> modules = new ArrayList<>();
+    private final Map<AbstractCommandManager<?, ?>, List<AbstractSubCommand<?>>> mappedCommands = new HashMap<>();
     private final JavaPlugin caller;
 
     public ModuleManager(JavaPlugin caller) {
@@ -33,9 +33,8 @@ public class ModuleManager {
     }
 
     public void reflectivelyRegisterModules() {
-        Set<Class<?>> classes = ReflectionUtil.of(caller.getClass()).getAllClassesFor(LumaModule.class);
-        System.out.println(classes);
-        List<AbstractSubCommand> queuedSubCommands = new LinkedList<>();
+        Set<Class<?>> classes = ReflectionUtil.of(caller.getClass()).getAllClassesFor();
+        List<AbstractSubCommand<?>> queuedSubCommands = new LinkedList<>();
 
         for (Class<?> aClass : classes) {
             if (aClass.isInterface() || Modifier.isAbstract(aClass.getModifiers()) || !aClass.isAnnotationPresent(AutoRegister.class)) {
@@ -49,7 +48,7 @@ public class ModuleManager {
                 }
 
                 List<RegisterType> types = List.of(aClass.getAnnotation(AutoRegister.class).value());
-                LumaModule instance = (LumaModule) constructor.newInstance();
+                Object instance = constructor.newInstance();
                 modules.add(instance);
 
                 if (types.contains(RegisterType.LISTENER) && instance instanceof Listener listener) {
@@ -60,23 +59,27 @@ public class ModuleManager {
                     registerForBukkitCommand(bukkitCommand);
                 }
 
-                if (types.contains(RegisterType.SUBCOMMAND) && instance instanceof AbstractSubCommand abstractSubCommand) {
+                if (types.contains(RegisterType.SUBCOMMAND) && instance instanceof AbstractSubCommand<?> abstractSubCommand) {
                     queuedSubCommands.add(abstractSubCommand);
                 }
 
             } catch (NoSuchMethodException ignored) {
                 // If the class doesn't have a no-args constructor, has to be registered manually
+                Logging.warningLog("Class " + aClass.getCanonicalName() + " does not have a no-args constructor, skipping.");
             } catch (Exception e) {
                 Logging.errorLog("An error occurred while registering a class reflectively: " + aClass.getCanonicalName(), e);
             }
         }
 
 
-
-        for (AbstractSubCommand abstractSubCommand : queuedSubCommands) {
-            AbstractCommandManager parent = mappedCommands.keySet().stream().filter(mappedCommands::containsKey).findFirst().orElse(null);
+        for (AbstractSubCommand<?> abstractSubCommand : queuedSubCommands) {
+            AbstractCommandManager<?, ?> parent = mappedCommands.keySet().stream()
+                    .filter(it -> {
+                        Class<?> parentClass = abstractSubCommand.parent();
+                        return parentClass.isInstance(it);
+                    }).findFirst().orElse(null);
             if (parent == null) {
-                Logging.warningLog("Could not fine parent CommandManager class for: " + abstractSubCommand.getClass().getSimpleName());
+                Logging.warningLog("Could not find parent CommandManager class for: " + abstractSubCommand.getClass().getSimpleName());
                 continue;
             }
 
@@ -87,7 +90,7 @@ public class ModuleManager {
     }
 
     public void unregisterModules() {
-        for (LumaModule module : modules) {
+        for (Object module : modules) {
             List<RegisterType> types = List.of(module.getClass().getAnnotation(AutoRegister.class).value());
             if (types.contains(RegisterType.LISTENER) && module instanceof Listener listener) {
                 unregisterForBukkitListener(listener);
@@ -114,7 +117,7 @@ public class ModuleManager {
         CommandMap commandMap = Bukkit.getCommandMap();
         commandMap.register(bukkitCommand.getLabel(), fallbackPrefix, bukkitCommand);
 
-        if (bukkitCommand instanceof AbstractCommandManager commandManager) {
+        if (bukkitCommand instanceof AbstractCommandManager<?, ?> commandManager) {
             mappedCommands.put(commandManager, new ArrayList<>());
         }
     }

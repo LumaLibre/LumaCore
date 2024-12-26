@@ -7,10 +7,11 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface SubCommandInfo {
+public @interface CommandInfo {
 
     String name();
 
+    String description() default "";
     String permission() default "";
     String[] aliases() default {};
     Class<? extends AbstractCommandManager> parent() default AbstractCommandManager.class;

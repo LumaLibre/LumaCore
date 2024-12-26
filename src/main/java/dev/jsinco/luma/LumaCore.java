@@ -4,6 +4,8 @@ import dev.jsinco.luma.manager.modules.ModuleManager;
 import lombok.Getter;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.lang.reflect.InvocationTargetException;
+
 public class LumaCore extends JavaPlugin {
 
     @Getter

@@ -11,7 +11,7 @@ public interface AbstractSubCommand<P extends JavaPlugin> extends LumaModule {
 
     boolean execute(P plugin, CommandSender sender, String label, String[] args);
 
-    List<String> tabComplete(P plugin, CommandSender sender, String label, String[] args);
+    List<String> tabComplete(P plugin, CommandSender sender, String[] args);
 
     default Class<? extends AbstractCommandManager> parent() {
         return info().parent();
@@ -33,8 +33,8 @@ public interface AbstractSubCommand<P extends JavaPlugin> extends LumaModule {
         return info().usage().replace("<command>", label);
     }
 
-    default SubCommandInfo info() {
-        SubCommandInfo info = getClass().getAnnotation(SubCommandInfo.class);
+    default CommandInfo info() {
+        CommandInfo info = getClass().getAnnotation(CommandInfo.class);
         if (info == null) {
             throw new IllegalStateException("CommandInfo annotation not found on " + getClass().getName());
         }
