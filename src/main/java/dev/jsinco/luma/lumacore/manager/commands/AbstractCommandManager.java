@@ -53,7 +53,9 @@ public abstract class AbstractCommandManager<P extends JavaPlugin, T extends Abs
 
         T subCommand = subCommands.get(args[0]);
         if (subCommand != null) {
-            return subCommand.tabComplete(plugin, sender, args);
+            String[] newArgs = new String[args.length - 1];
+            System.arraycopy(args, 1, newArgs, 0, args.length - 1);
+            return subCommand.tabComplete(plugin, sender, newArgs);
         }
         return null;
     }
