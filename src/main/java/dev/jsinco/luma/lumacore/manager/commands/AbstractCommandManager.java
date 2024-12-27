@@ -6,6 +6,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +28,7 @@ public abstract class AbstractCommandManager<P extends JavaPlugin, T extends Abs
         }
 
         T subCommand = subCommands.get(args[0]);
-        if (subCommand.playerOnly() && sender instanceof Player) {
+        if (subCommand.playerOnly() && !(sender instanceof Player)) {
             return false;
         } else if (subCommand.permission() != null && !sender.hasPermission(subCommand.permission())) {
             return false;
@@ -46,7 +47,7 @@ public abstract class AbstractCommandManager<P extends JavaPlugin, T extends Abs
             return null;
         } else if (args.length == 1) {
             return subCommands.keySet().stream()
-                    .filter(s -> !sender.hasPermission(subCommands.get(s).permission()))
+                    .filter(s -> sender.hasPermission(subCommands.get(s).permission()))
                     .toList();
         }
 
