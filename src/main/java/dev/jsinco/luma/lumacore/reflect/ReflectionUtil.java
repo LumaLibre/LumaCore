@@ -1,7 +1,7 @@
-package dev.jsinco.luma.reflect;
+package dev.jsinco.luma.lumacore.reflect;
 
 import com.google.common.reflect.ClassPath;
-import dev.jsinco.luma.utility.Logging;
+import dev.jsinco.luma.lumacore.utility.Logging;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;

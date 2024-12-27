@@ -1,4 +1,4 @@
-package dev.jsinco.luma.manager.commands;
+package dev.jsinco.luma.lumacore.manager.commands;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

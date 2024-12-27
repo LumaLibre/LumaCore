@@ -1,4 +1,4 @@
-package dev.jsinco.luma.manager.modules;
+package dev.jsinco.luma.lumacore.manager.modules;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

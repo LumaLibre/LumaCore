@@ -1,5 +1,5 @@
 name: LumaCore
-main: dev.jsinco.luma.LumaCore
+main: dev.jsinco.luma.lumacore.LumaCore
 version: '${version}'
 api-version: 1.21
 author: 'Jsinco'

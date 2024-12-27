@@ -1,4 +1,4 @@
-package dev.jsinco.luma.manager.guis;
+package dev.jsinco.luma.lumacore.manager.guis;
 
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.inventory.InventoryClickEvent;

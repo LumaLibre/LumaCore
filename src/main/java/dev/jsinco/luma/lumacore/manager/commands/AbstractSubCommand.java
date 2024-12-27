@@ -1,4 +1,4 @@
-package dev.jsinco.luma.manager.commands;
+package dev.jsinco.luma.lumacore.manager.commands;
 
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;

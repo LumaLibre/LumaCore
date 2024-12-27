@@ -1,4 +1,4 @@
-package dev.jsinco.luma.utility;
+package dev.jsinco.luma.lumacore.utility;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;

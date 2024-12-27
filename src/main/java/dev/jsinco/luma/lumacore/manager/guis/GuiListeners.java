@@ -1,7 +1,7 @@
-package dev.jsinco.luma.manager.guis;
+package dev.jsinco.luma.lumacore.manager.guis;
 
-import dev.jsinco.luma.manager.modules.AutoRegister;
-import dev.jsinco.luma.manager.modules.RegisterType;
+import dev.jsinco.luma.lumacore.manager.modules.AutoRegister;
+import dev.jsinco.luma.lumacore.manager.modules.RegisterType;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;

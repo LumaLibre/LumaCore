@@ -10,7 +10,7 @@ plugins {
     id("io.papermc.paperweight.userdev") version("1.7.5")
 }
 
-group = "dev.jsinco.luma"
+group = "dev.jsinco.luma.lumacore"
 version = getGitCommitHashShort()
 
 val jdkVersion: Int = 21

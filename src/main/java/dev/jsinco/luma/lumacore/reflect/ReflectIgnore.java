@@ -1,4 +1,4 @@
-package dev.jsinco.luma.reflect;
+package dev.jsinco.luma.lumacore.reflect;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

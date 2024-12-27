@@ -1,4 +1,4 @@
-package dev.jsinco.luma.manager.modules;
+package dev.jsinco.luma.lumacore.manager.modules;
 
 public enum RegisterType {
     LISTENER,

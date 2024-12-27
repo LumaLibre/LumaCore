@@ -1,9 +1,9 @@
-package dev.jsinco.luma.manager.modules;
+package dev.jsinco.luma.lumacore.manager.modules;
 
-import dev.jsinco.luma.manager.commands.AbstractCommandManager;
-import dev.jsinco.luma.manager.commands.AbstractSubCommand;
-import dev.jsinco.luma.reflect.ReflectionUtil;
-import dev.jsinco.luma.utility.Logging;
+import dev.jsinco.luma.lumacore.manager.commands.AbstractCommandManager;
+import dev.jsinco.luma.lumacore.manager.commands.AbstractSubCommand;
+import dev.jsinco.luma.lumacore.reflect.ReflectionUtil;
+import dev.jsinco.luma.lumacore.utility.Logging;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandMap;
 import org.bukkit.command.defaults.BukkitCommand;

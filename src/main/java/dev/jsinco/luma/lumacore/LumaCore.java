@@ -1,6 +1,6 @@
-package dev.jsinco.luma;
+package dev.jsinco.luma.lumacore;
 
-import dev.jsinco.luma.manager.modules.ModuleManager;
+import dev.jsinco.luma.lumacore.manager.modules.ModuleManager;
 import lombok.Getter;
 import org.bukkit.plugin.java.JavaPlugin;
 
