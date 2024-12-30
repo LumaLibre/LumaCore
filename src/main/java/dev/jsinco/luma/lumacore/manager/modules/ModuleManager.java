@@ -24,7 +24,7 @@ public class ModuleManager {
 
     private final String fallbackPrefix = "lumacore";
     private final List<Object> modules = new ArrayList<>();
-    private final Map<AbstractCommandManager<?, ?>, List<AbstractSubCommand<?>>> mappedCommands = new HashMap<>();
+    private final Map<AbstractCommandManager<?, ?>, List<AbstractSubCommand<?>>> mappedCommandManagers = new HashMap<>();
     private final JavaPlugin caller;
 
     public ModuleManager(JavaPlugin caller) {
@@ -73,7 +73,7 @@ public class ModuleManager {
 
 
         for (AbstractSubCommand<?> abstractSubCommand : queuedSubCommands) {
-            AbstractCommandManager<?, ?> parent = mappedCommands.keySet().stream()
+            AbstractCommandManager<?, ?> parent = mappedCommandManagers.keySet().stream()
                     .filter(it -> {
                         Class<?> parentClass = abstractSubCommand.parent();
                         return parentClass.isInstance(it);
@@ -118,16 +118,21 @@ public class ModuleManager {
         commandMap.register(bukkitCommand.getLabel(), fallbackPrefix, bukkitCommand);
 
         if (bukkitCommand instanceof AbstractCommandManager<?, ?> commandManager) {
-            mappedCommands.put(commandManager, new ArrayList<>());
+            mappedCommandManagers.put(commandManager, new ArrayList<>());
         }
     }
 
 
     private void unregisterForBukkitCommand(BukkitCommand bukkitCommand) {
         CommandMap commandMap = Bukkit.getCommandMap();
-        commandMap.getKnownCommands().remove(fallbackPrefix + ":" + bukkitCommand.getLabel());
+        var knownCommands = commandMap.getKnownCommands();
+
+        knownCommands.remove(fallbackPrefix + ":" + bukkitCommand.getLabel());
+        knownCommands.remove(bukkitCommand.getLabel());
+
         for (String alias : bukkitCommand.getAliases()) {
-            commandMap.getKnownCommands().remove(fallbackPrefix + ":" + alias);
+            knownCommands.remove(fallbackPrefix + ":" + alias);
+            knownCommands.remove(bukkitCommand.getLabel());
         }
     }
 }
