@@ -132,7 +132,7 @@ public class ModuleManager {
 
         for (String alias : bukkitCommand.getAliases()) {
             knownCommands.remove(fallbackPrefix + ":" + alias);
-            knownCommands.remove(bukkitCommand.getLabel());
+            knownCommands.remove(alias);
         }
     }
 }
