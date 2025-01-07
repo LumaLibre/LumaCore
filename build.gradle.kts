@@ -77,6 +77,7 @@ kotlin {
 
 java {
     toolchain.languageVersion = JavaLanguageVersion.of(jdkVersion)
+    withSourcesJar()
 }
 
 publishing {
