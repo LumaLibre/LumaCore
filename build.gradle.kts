@@ -27,6 +27,7 @@ dependencies {
     // Lombok
     compileOnly("org.projectlombok:lombok:1.18.30")
     annotationProcessor("org.projectlombok:lombok:1.18.30")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:2.1.0")
 
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
@@ -52,7 +53,9 @@ tasks {
 
     }
     shadowJar {
-
+        dependencies {
+            include(dependency("org.jetbrains.kotlin:kotlin-stdlib"))
+        }
         archiveClassifier.set("")
     }
     processResources {

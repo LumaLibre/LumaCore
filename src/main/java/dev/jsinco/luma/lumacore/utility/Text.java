@@ -9,7 +9,7 @@ import java.util.stream.Stream;
 
 public class Text {
 
-    public static final Component PREFIX = mm("<b><#f498f6>I<#c990f9>n<#9d88fc>f<#7280ff>o</b> <dark_gray>»<white> ");
+    public static final Component PREFIX = mm("<b><#b986f9>Info</b> <dark_gray>»<white> ");
 
     private static final String NORMAL_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     private static final String MONO_UPPER_ALPHABET = "ᴀʙᴄᴅᴇꜰɢʜɪᴊᴋʟᴍɴᴏᴘQʀꜱᴛᴜᴠᴡxʏᴢ";
