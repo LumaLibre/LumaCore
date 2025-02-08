@@ -1,7 +1,10 @@
 package dev.jsinco.luma.lumacore.manager.modules;
 
+import dev.jsinco.luma.lumacore.LumaCore;
 import dev.jsinco.luma.lumacore.manager.commands.AbstractCommandManager;
 import dev.jsinco.luma.lumacore.manager.commands.AbstractSubCommand;
+import dev.jsinco.luma.lumacore.manager.placeholder.AbstractPlaceholder;
+import dev.jsinco.luma.lumacore.manager.placeholder.AbstractPlaceholderManager;
 import dev.jsinco.luma.lumacore.reflect.ReflectionUtil;
 import dev.jsinco.luma.lumacore.utility.Logging;
 import org.bukkit.Bukkit;
@@ -25,6 +28,7 @@ public class ModuleManager {
     private final String fallbackPrefix = "lumacore";
     private final List<Object> modules = new ArrayList<>();
     private final Map<AbstractCommandManager<?, ?>, List<AbstractSubCommand<?>>> mappedCommandManagers = new HashMap<>();
+    private final Map<AbstractPlaceholderManager<?, ?>, List<AbstractPlaceholder<?>>> mappedPlaceholderManagers = new HashMap<>();
     private final JavaPlugin caller;
 
     public ModuleManager(JavaPlugin caller) {
@@ -35,6 +39,7 @@ public class ModuleManager {
     public void reflectivelyRegisterModules() {
         Set<Class<?>> classes = ReflectionUtil.of(caller.getClass()).getAllClassesFor();
         List<AbstractSubCommand<?>> queuedSubCommands = new LinkedList<>();
+        List<AbstractPlaceholder<?>> queuedPlaceholders = new LinkedList<>();
 
         for (Class<?> aClass : classes) {
             if (aClass.isInterface() || Modifier.isAbstract(aClass.getModifiers()) || !aClass.isAnnotationPresent(AutoRegister.class)) {
@@ -63,6 +68,14 @@ public class ModuleManager {
                     queuedSubCommands.add(abstractSubCommand);
                 }
 
+                if (types.contains(RegisterType.PLACEHOLDER) && instance instanceof AbstractPlaceholderManager<?, ?> placeholderManager) {
+                    registerForPlaceholderManager(placeholderManager);
+                }
+
+                if (types.contains(RegisterType.PLACEHOLDER) && instance instanceof AbstractPlaceholder<?> placeholder) {
+                    queuedPlaceholders.add(placeholder);
+                }
+
             } catch (NoSuchMethodException ignored) {
                 // If the class doesn't have a no-args constructor, has to be registered manually
                 Logging.warningLog("Class " + aClass.getCanonicalName() + " does not have a no-args constructor, skipping.");
@@ -86,6 +99,20 @@ public class ModuleManager {
             parent.addSubCommand(abstractSubCommand);
         }
 
+        for (AbstractPlaceholder<?> placeholder : queuedPlaceholders) {
+            AbstractPlaceholderManager<?, ?> parent = mappedPlaceholderManagers.keySet().stream()
+                    .filter(it -> {
+                        Class<?> parentClass = placeholder.parent();
+                        return parentClass.isInstance(it);
+                    }).findFirst().orElse(null);
+            if (parent == null) {
+                Logging.warningLog("Could not find parent PlaceholderManager class for: " + placeholder.getClass().getSimpleName());
+                continue;
+            }
+
+            parent.addPlaceholder(placeholder);
+        }
+
         Logging.log("Finished registering classes/modules reflectively! (" + modules.size() + ")");
     }
 
@@ -97,6 +124,9 @@ public class ModuleManager {
             }
             if (types.contains(RegisterType.COMMAND) && module instanceof BukkitCommand bukkitCommand) {
                 unregisterForBukkitCommand(bukkitCommand);
+            }
+            if (types.contains(RegisterType.PLACEHOLDER) && module instanceof AbstractPlaceholderManager<?, ?> placeholderManager) {
+                unregisterForPlaceholderManager(placeholderManager);
             }
 //            if (types.contains(RegisterType.SUBCOMMAND) && module instanceof AbstractSubCommand abstractSubCommand) {
 //                unregisterForSubcommand(abstractSubCommand);
@@ -133,6 +163,19 @@ public class ModuleManager {
         for (String alias : bukkitCommand.getAliases()) {
             knownCommands.remove(fallbackPrefix + ":" + alias);
             knownCommands.remove(alias);
+        }
+    }
+
+    private void registerForPlaceholderManager(AbstractPlaceholderManager<?, ?> placeholderManager) {
+        if (LumaCore.isWithPlaceholderAPI()) {
+            mappedPlaceholderManagers.put(placeholderManager, new ArrayList<>());
+            placeholderManager.register();
+        }
+    }
+
+    private void unregisterForPlaceholderManager(AbstractPlaceholderManager<?, ?> placeholderManager) {
+        if (LumaCore.isWithPlaceholderAPI()) {
+            placeholderManager.unregister();
         }
     }
 }
