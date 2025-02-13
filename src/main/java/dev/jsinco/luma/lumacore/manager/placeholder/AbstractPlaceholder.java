@@ -8,8 +8,6 @@ import java.util.List;
 
 public interface AbstractPlaceholder<P extends JavaPlugin> {
 
-
-
     @Nullable
     String onRequest(P plugin, @Nullable OfflinePlayer player, List<String> args);
 

@@ -36,7 +36,9 @@ public abstract class AbstractCommandManager<P extends JavaPlugin, T extends Abs
 
         String[] newArgs = new String[args.length - 1];
         System.arraycopy(args, 1, newArgs, 0, args.length - 1);
-        subCommand.execute(plugin, sender, label, newArgs);
+        if (!subCommand.execute(plugin, sender, label, newArgs)) {
+            sender.sendMessage("Invalid usage. Correct usage: " + subCommand.info().usage());
+        }
         return true;
     }
 
