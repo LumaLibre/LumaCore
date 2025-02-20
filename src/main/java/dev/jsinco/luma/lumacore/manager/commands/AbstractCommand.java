@@ -1,6 +1,7 @@
 package dev.jsinco.luma.lumacore.manager.commands;
 
 import com.google.common.collect.ImmutableList;
+import dev.jsinco.luma.lumacore.utility.Text;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.defaults.BukkitCommand;
 import org.bukkit.entity.Player;
@@ -64,11 +65,17 @@ public abstract class AbstractCommand extends BukkitCommand {
     @Override
     public boolean execute(@NotNull CommandSender commandSender, @NotNull String s, @NotNull String[] strings) {
         if (playerOnly && !(commandSender instanceof Player)) {
-            return false;
-        } else if (permission.isEmpty() || commandSender.hasPermission(permission)) {
-            return handle(commandSender, s, strings);
+            Text.msg(commandSender, "This command can only be executed by players.");
+            return true;
+        } else if (!permission.isEmpty() && !commandSender.hasPermission(permission)) {
+            Text.msg(commandSender, "You do not have permission to execute this command.");
+            return true;
         }
-        return false;
+
+        if (!handle(commandSender, s, strings)) {
+            Text.msg(commandSender, "Invalid usage. Usage: " + getUsage());
+        }
+        return true;
     }
 
     @Override
