@@ -38,6 +38,10 @@ public class ModuleManager {
 
     public void reflectivelyRegisterModules() {
         Set<Class<?>> classes = ReflectionUtil.of(caller.getClass()).getAllClassesFor();
+        reflectivelyRegisterModules(classes);
+    }
+
+    public void reflectivelyRegisterModules(Set<Class<?>> classes) {
         List<AbstractSubCommand<?>> queuedSubCommands = new LinkedList<>();
         List<AbstractPlaceholder<?>> queuedPlaceholders = new LinkedList<>();
 

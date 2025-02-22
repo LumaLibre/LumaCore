@@ -2,6 +2,7 @@ package dev.jsinco.luma.lumacore.reflect;
 
 import com.google.common.reflect.ClassPath;
 import dev.jsinco.luma.lumacore.utility.Logging;
+import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
@@ -15,21 +16,24 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.stream.Collectors;
 
+@Getter
 public final class ReflectionUtil {
 
-    public final String basePackage;
+    private final String basePackage;
+    private final List<String> whitelistedPackages;
     private final Class<?> base;
 
     public ReflectionUtil(Class<?> base) {
         this.base = base;
         this.basePackage = base.getPackage().getName();
+        this.whitelistedPackages = new ArrayList<>();
     }
 
     public static ReflectionUtil of(Class<?> base) {
         return new ReflectionUtil(base);
     }
 
-    public Set<Class<?>> getAllClassesFor(@Nullable Class<?>... classes) {
+    public Set<Class<?>> getAllClassesFor(Class<?>... classes) {
         List<String> packages;
         try {
             packages = getAllPackages();
@@ -98,7 +102,7 @@ public final class ReflectionUtil {
                     String className = entry.getName().replace('/', '.').replace(".class", "");
                     if (className.startsWith(basePackage)) {
                         String packageName = className.substring(0, className.lastIndexOf('.'));
-                        if (!packages.contains(packageName)) {
+                        if ((!whitelistedPackages.isEmpty() && !whitelistedPackages.contains(packageName)) || !packages.contains(packageName)) {
                             packages.add(packageName);
                         }
                     }

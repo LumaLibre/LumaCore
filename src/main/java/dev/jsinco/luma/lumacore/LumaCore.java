@@ -6,6 +6,9 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class LumaCore extends JavaPlugin {
 
+    // TODO: I really need to fixup this project. Concept is cool, api frontend is okay,
+    //  backend is HORRIBLE/incomplete
+
     @Getter
     private static LumaCore instance;
     private static ModuleManager coreModuleManager;
