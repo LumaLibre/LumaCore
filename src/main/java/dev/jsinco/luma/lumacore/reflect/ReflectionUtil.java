@@ -33,6 +33,20 @@ public final class ReflectionUtil {
         return new ReflectionUtil(base);
     }
 
+    public void whitelistPackages(String... packages) {
+        whitelistPackages(true, packages);
+    }
+
+    public void whitelistPackages(boolean appendToBase, String... packages) {
+        for (String pack : packages) {
+            if (appendToBase) {
+                whitelistedPackages.add(basePackage + "." + pack);
+            } else {
+                whitelistedPackages.add(pack);
+            }
+        }
+    }
+
     public Set<Class<?>> getAllClassesFor(Class<?>... classes) {
         List<String> packages;
         try {
@@ -54,7 +68,7 @@ public final class ReflectionUtil {
         return allClasses;
     }
 
-    private Set<Class<?>> findClasses(String packageName, List<Class<?>> classes) throws IOException {
+    public Set<Class<?>> findClasses(String packageName, List<Class<?>> classes) throws IOException {
         ClassLoader classLoader = base.getClassLoader();
 
         Set<Class<?>> foundClasses = ClassPath.from(classLoader)
@@ -91,7 +105,7 @@ public final class ReflectionUtil {
         return returnableClasses;
     }
 
-    private List<String> getAllPackages() throws IOException {
+    public List<String> getAllPackages() throws IOException {
         List<String> packages = new ArrayList<>();
         try (JarFile jarFile = new JarFile(base.getProtectionDomain().getCodeSource().getLocation().getPath())) {
             Enumeration<JarEntry> entries = jarFile.entries();
