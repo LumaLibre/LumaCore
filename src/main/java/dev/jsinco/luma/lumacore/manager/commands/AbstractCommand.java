@@ -73,7 +73,7 @@ public abstract class AbstractCommand extends BukkitCommand {
         }
 
         if (!handle(commandSender, s, strings)) {
-            Text.msg(commandSender, "Invalid usage. Usage: " + getUsage());
+            Text.msg(commandSender, "Invalid usage. Usage: " + getUsage().replace("<command>", s));
         }
         return true;
     }

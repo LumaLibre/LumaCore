@@ -49,11 +49,16 @@ public final class ReflectionUtil {
 
     public Set<Class<?>> getAllClassesFor(Class<?>... classes) {
         List<String> packages;
-        try {
-            packages = getAllPackages();
-        } catch (IOException e) {
-            Logging.errorLog("An error occurred while searching for classes!", e);
-            return Set.of();
+
+        if (!whitelistedPackages.isEmpty()) {
+            packages = whitelistedPackages;
+        } else {
+            try {
+                packages = getAllPackages();
+            } catch (IOException e) {
+                Logging.errorLog("An error occurred while searching for classes!", e);
+                return Set.of();
+            }
         }
 
         Set<Class<?>> allClasses = new HashSet<>();
@@ -114,11 +119,13 @@ public final class ReflectionUtil {
                 JarEntry entry = entries.nextElement();
                 if (entry.getName().endsWith(".class")) {
                     String className = entry.getName().replace('/', '.').replace(".class", "");
-                    if (className.startsWith(basePackage)) {
-                        String packageName = className.substring(0, className.lastIndexOf('.'));
-                        if ((!whitelistedPackages.isEmpty() && !whitelistedPackages.contains(packageName)) || !packages.contains(packageName)) {
-                            packages.add(packageName);
-                        }
+                    if (!className.startsWith(basePackage)) {
+                        continue;
+                    }
+
+                    String packageName = className.substring(0, className.lastIndexOf('.'));
+                    if (!packages.contains(packageName)) {
+                        packages.add(packageName);
                     }
                 }
             }
