@@ -1,7 +1,6 @@
 package dev.jsinco.luma.lumacore.manager.placeholder;
 
 import dev.jsinco.luma.lumacore.manager.commands.AbstractSubCommand;
-import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
@@ -11,48 +10,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public abstract class AbstractPlaceholderManager<P extends JavaPlugin, T extends AbstractPlaceholder<P>> extends PlaceholderExpansion {
+public abstract class AbstractPlaceholderManager<P extends JavaPlugin, T extends AbstractPlaceholder<P>> extends SoloAbstractPlaceholder {
 
     protected Map<String, T> placeholders = new HashMap<>();
     protected final P plugin;
-    protected final String identifier;
-    protected final String author;
-    protected final String version;
 
     protected AbstractPlaceholderManager(P plugin) {
         super();
         this.plugin = plugin;
-        PlaceholderInfo info = getClass().getAnnotation(PlaceholderInfo.class);
-        if (info == null) {
-            throw new IllegalStateException("PlaceholderInfo annotation not found on " + getClass().getName());
-        }
-        this.identifier = info.identifier();
-        this.author = info.author();
-        this.version = info.version();
     }
 
     protected AbstractPlaceholderManager(P plugin, String identifier, String author, String version) {
-        super();
+        super(identifier, author, version);
         this.plugin = plugin;
-        this.identifier = identifier;
-        this.author = author;
-        this.version = version;
-    }
-
-
-    @Override
-    public @NotNull String getIdentifier() {
-        return identifier;
-    }
-
-    @Override
-    public @NotNull String getAuthor() {
-        return author;
-    }
-
-    @Override
-    public @NotNull String getVersion() {
-        return version;
     }
 
     @Nullable

@@ -5,6 +5,7 @@ import dev.jsinco.luma.lumacore.manager.commands.AbstractCommandManager;
 import dev.jsinco.luma.lumacore.manager.commands.AbstractSubCommand;
 import dev.jsinco.luma.lumacore.manager.placeholder.AbstractPlaceholder;
 import dev.jsinco.luma.lumacore.manager.placeholder.AbstractPlaceholderManager;
+import dev.jsinco.luma.lumacore.manager.placeholder.SoloAbstractPlaceholder;
 import dev.jsinco.luma.lumacore.reflect.ReflectionUtil;
 import dev.jsinco.luma.lumacore.utility.Logging;
 import org.bukkit.Bukkit;
@@ -72,6 +73,10 @@ public class ModuleManager {
                     queuedSubCommands.add(abstractSubCommand);
                 }
 
+                if (types.contains(RegisterType.PLACEHOLDER) && instance instanceof SoloAbstractPlaceholder soloAbstractPlaceholder) {
+                    registerForSoloAbstractPlaceholder(soloAbstractPlaceholder);
+                }
+
                 if (types.contains(RegisterType.PLACEHOLDER) && instance instanceof AbstractPlaceholderManager<?, ?> placeholderManager) {
                     registerForPlaceholderManager(placeholderManager);
                 }
@@ -129,6 +134,9 @@ public class ModuleManager {
             if (types.contains(RegisterType.COMMAND) && module instanceof BukkitCommand bukkitCommand) {
                 unregisterForBukkitCommand(bukkitCommand);
             }
+            if (types.contains(RegisterType.PLACEHOLDER) && module instanceof SoloAbstractPlaceholder soloAbstractPlaceholder) {
+                unregisterForSoloAbstractPlaceholder(soloAbstractPlaceholder);
+            }
             if (types.contains(RegisterType.PLACEHOLDER) && module instanceof AbstractPlaceholderManager<?, ?> placeholderManager) {
                 unregisterForPlaceholderManager(placeholderManager);
             }
@@ -167,6 +175,18 @@ public class ModuleManager {
         for (String alias : bukkitCommand.getAliases()) {
             knownCommands.remove(fallbackPrefix + ":" + alias);
             knownCommands.remove(alias);
+        }
+    }
+
+    private void registerForSoloAbstractPlaceholder(SoloAbstractPlaceholder soloAbstractPlaceholder) {
+        if (LumaCore.isWithPlaceholderAPI()) {
+            soloAbstractPlaceholder.register();
+        }
+    }
+
+    private void unregisterForSoloAbstractPlaceholder(SoloAbstractPlaceholder soloAbstractPlaceholder) {
+        if (LumaCore.isWithPlaceholderAPI()) {
+            soloAbstractPlaceholder.unregister();
         }
     }
 

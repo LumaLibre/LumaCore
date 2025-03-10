@@ -86,6 +86,8 @@ public final class ReflectionUtil {
                     } catch (ClassNotFoundException e) {
                         Logging.errorLog("Error while loading class", e);
                         return null;
+                    } catch (NoClassDefFoundError e) {
+                        return null;
                     }
                 })
                 .filter(Objects::nonNull)
