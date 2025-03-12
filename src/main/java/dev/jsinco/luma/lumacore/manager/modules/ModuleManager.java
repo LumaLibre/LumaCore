@@ -193,7 +193,6 @@ public class ModuleManager {
     private void registerForPlaceholderManager(AbstractPlaceholderManager<?, ?> placeholderManager) {
         if (LumaCore.isWithPlaceholderAPI()) {
             mappedPlaceholderManagers.put(placeholderManager, new ArrayList<>());
-            placeholderManager.register();
         }
     }
 
