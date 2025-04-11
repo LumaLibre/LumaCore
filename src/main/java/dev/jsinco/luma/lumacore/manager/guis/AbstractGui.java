@@ -1,5 +1,6 @@
 package dev.jsinco.luma.lumacore.manager.guis;
 
+import dev.jsinco.luma.lumacore.utility.Logging;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.InventoryHolder;
@@ -40,13 +41,13 @@ public abstract class AbstractGui implements InventoryHolder {
     protected void autoRegister() {
         for (Field field : this.getClass().getDeclaredFields()) {
             field.setAccessible(true);
-            if (field.getType() != GuiItem.class) {
-                continue;
-            }
+            if (field.getType() != GuiItem.class) continue;
             try {
                 GuiItem guiItem = (GuiItem) field.get(this);
                 if (guiItem != null) {
                     this.addItem(guiItem);
+                } else {
+                    Logging.errorLog("GuiItem field '" + field.getName() + "' is null in " + this.getClass().getSimpleName());
                 }
             } catch (IllegalAccessException e) {
                 throw new RuntimeException(e);
