@@ -13,14 +13,14 @@ public class GuiListeners implements Listener {
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
         if (event.getInventory().getHolder(false) instanceof AbstractGui gui) {
-            gui.onInventoryClick(event);
+            gui.handleInventoryInitialClick(event);
         }
     }
 
     @EventHandler
     public void onInventoryClose(InventoryCloseEvent event) {
         if (event.getInventory().getHolder(false) instanceof AbstractGui gui) {
-            gui.onInventoryClose(event);
+            gui.handleInventoryInitialClose(event);
         }
     }
 }
