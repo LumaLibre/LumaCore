@@ -1,6 +1,9 @@
 package dev.jsinco.luma.lumacore.manager.guis;
 
+import dev.jsinco.luma.lumacore.LumaCore;
 import dev.jsinco.luma.lumacore.utility.Logging;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.InventoryHolder;
@@ -52,6 +55,14 @@ public abstract class AbstractGui implements InventoryHolder {
             } catch (IllegalAccessException e) {
                 throw new RuntimeException(e);
             }
+        }
+    }
+
+    public void open(HumanEntity humanEntity) {
+        if (!Bukkit.isPrimaryThread()) {
+            Bukkit.getScheduler().runTask(LumaCore.getInstance(), () -> humanEntity.openInventory(this.getInventory()));
+        } else {
+            humanEntity.openInventory(this.getInventory());
         }
     }
 
