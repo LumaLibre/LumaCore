@@ -57,12 +57,13 @@ public class ModuleManager {
                     continue;
                 }
 
-                List<RegisterType> types = List.of(aClass.getAnnotation(AutoRegister.class).value());
+                AutoRegister annotation = aClass.getAnnotation(AutoRegister.class);
+                List<RegisterType> types = List.of(annotation.value());
                 Object instance = constructor.newInstance();
                 modules.add(instance);
 
                 if (types.contains(RegisterType.LISTENER) && instance instanceof Listener listener) {
-                    registerForBukkitListener(listener);
+                    registerForBukkitListener(listener, annotation.listenerRequires());
                 }
 
                 if (types.contains(RegisterType.COMMAND) && instance instanceof BukkitCommand bukkitCommand) {
@@ -127,9 +128,10 @@ public class ModuleManager {
 
     public void unregisterModules() {
         for (Object module : modules) {
-            List<RegisterType> types = List.of(module.getClass().getAnnotation(AutoRegister.class).value());
+            AutoRegister annotation = module.getClass().getAnnotation(AutoRegister.class);
+            List<RegisterType> types = List.of(annotation.value());
             if (types.contains(RegisterType.LISTENER) && module instanceof Listener listener) {
-                unregisterForBukkitListener(listener);
+                unregisterForBukkitListener(listener, annotation.listenerRequires());
             }
             if (types.contains(RegisterType.COMMAND) && module instanceof BukkitCommand bukkitCommand) {
                 unregisterForBukkitCommand(bukkitCommand);
@@ -147,11 +149,17 @@ public class ModuleManager {
     }
 
 
-    private void registerForBukkitListener(Listener listener) {
+    private void registerForBukkitListener(Listener listener, String requires) {
+        if (!requires.isBlank() && Bukkit.getPluginManager().getPlugin(requires) == null) {
+            return;
+        }
         caller.getServer().getPluginManager().registerEvents(listener, caller);
     }
 
-    private void unregisterForBukkitListener(Listener listener) {
+    private void unregisterForBukkitListener(Listener listener, String requires) {
+        if (!requires.isBlank() && Bukkit.getPluginManager().getPlugin(requires) == null) {
+            return;
+        }
         HandlerList.unregisterAll(listener);
     }
 
