@@ -12,11 +12,11 @@ import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class AbstractGui implements InventoryHolder {
+public abstract class AbstractGui<I extends GuiItem> implements InventoryHolder {
 
-    protected final Map<Integer, GuiItem> guiItemsMap = new HashMap<>();
+    protected final Map<Integer, I> guiItemsMap = new HashMap<>();
 
-    public void addItem(GuiItem guiItem) {
+    public void addItem(I guiItem) {
         guiItemsMap.put(guiItem.getIndex(), guiItem);
         this.getInventory().setItem(guiItem.getIndex(), guiItem.getItemStack());
     }
@@ -29,7 +29,7 @@ public abstract class AbstractGui implements InventoryHolder {
     protected void handleInventoryInitialClick(InventoryClickEvent event) {
         for (var mapEntry : guiItemsMap.entrySet()) {
             if (event.getSlot() == mapEntry.getKey()) {
-                GuiItem guiItem = mapEntry.getValue();
+                I guiItem = mapEntry.getValue();
                 guiItem.handleAction(event);
                 break;
             }
@@ -44,9 +44,9 @@ public abstract class AbstractGui implements InventoryHolder {
     protected void autoRegister() {
         for (Field field : this.getClass().getDeclaredFields()) {
             field.setAccessible(true);
-            if (field.getType() != GuiItem.class) continue;
+            if (!GuiItem.class.isAssignableFrom(field.getType())) continue;
             try {
-                GuiItem guiItem = (GuiItem) field.get(this);
+                I guiItem = (I) field.get(this);
                 if (guiItem != null) {
                     this.addItem(guiItem);
                 } else {
