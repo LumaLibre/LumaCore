@@ -57,22 +57,40 @@ public abstract class AbstractGui<I extends AbstractGuiItem> implements Inventor
         this.onInventoryClose(event);
     }
 
-    protected void autoRegister() {
-        for (Field field : this.getClass().getDeclaredFields()) {
+    protected void autoRegister(Class<?> forClass) {
+        for (Field field : forClass.getDeclaredFields()) {
             field.setAccessible(true);
             if (!AbstractGuiItem.class.isAssignableFrom(field.getType())) continue;
+
             try {
                 I guiItem = (I) field.get(this);
                 if (guiItem != null) {
                     this.addItem(guiItem);
                 } else {
-                    Logging.errorLog("GuiItem field '" + field.getName() + "' is null in " + this.getClass().getSimpleName());
+                    Logging.errorLog("GuiItem field '" + field.getName() + "' is null in " + forClass.getSimpleName());
                 }
             } catch (IllegalAccessException e) {
                 throw new RuntimeException(e);
             }
         }
     }
+
+    protected void autoRegister(boolean walk) {
+        Class<?> currentClass = this.getClass();
+        if (walk) {
+            while (currentClass != null && currentClass != Object.class) {
+                this.autoRegister(currentClass);
+                currentClass = currentClass.getSuperclass();
+            }
+        } else {
+            this.autoRegister(currentClass);
+        }
+    }
+
+    protected void autoRegister() {
+        this.autoRegister(false);
+    }
+
 
     public void open(HumanEntity humanEntity) {
         if (!Bukkit.isPrimaryThread()) {
