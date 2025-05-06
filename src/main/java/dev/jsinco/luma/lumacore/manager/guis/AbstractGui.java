@@ -1,39 +1,55 @@
 package dev.jsinco.luma.lumacore.manager.guis;
 
 import dev.jsinco.luma.lumacore.LumaCore;
+import dev.jsinco.luma.lumacore.manager.guis.items.AbstractGuiItem;
+import dev.jsinco.luma.lumacore.manager.guis.items.IndexedGuiItem;
+import dev.jsinco.luma.lumacore.manager.guis.items.KeyedGuiItem;
 import dev.jsinco.luma.lumacore.utility.Logging;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.inventory.ItemStack;
 
 import java.lang.reflect.Field;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 
-public abstract class AbstractGui<I extends GuiItem> implements InventoryHolder {
+public abstract class AbstractGui<I extends AbstractGuiItem> implements InventoryHolder {
 
-    protected final Map<Integer, I> guiItemsMap = new HashMap<>();
+    protected final Set<I> guiItemsMap = new HashSet<>();
 
     public void addItem(I guiItem) {
-        guiItemsMap.put(guiItem.getIndex(), guiItem);
-        this.getInventory().setItem(guiItem.getIndex(), guiItem.getItemStack());
+        guiItemsMap.add(guiItem);
+        if (guiItem instanceof IndexedGuiItem indexedGuiItem) {
+            this.getInventory().setItem(indexedGuiItem.getIndex(), indexedGuiItem.getItemStack());
+        }
     }
 
-    public void removeItem(int index) {
-        guiItemsMap.remove(index);
-        this.getInventory().setItem(index, null);
+    public void removeItem(I guiItem) {
+        guiItemsMap.remove(guiItem);
+        if (guiItem instanceof IndexedGuiItem indexedGuiItem) {
+            this.getInventory().setItem(indexedGuiItem.getIndex(), null);
+        }
     }
 
     protected void handleInventoryInitialClick(InventoryClickEvent event) {
-        for (var mapEntry : guiItemsMap.entrySet()) {
-            if (event.getSlot() == mapEntry.getKey()) {
-                I guiItem = mapEntry.getValue();
-                guiItem.handleAction(event);
-                break;
+        ItemStack currentItem = event.getCurrentItem();
+        if (currentItem != null) {
+            for (AbstractGuiItem guiItem : this.guiItemsMap) {
+                if (guiItem instanceof IndexedGuiItem indexedGuiItem && event.getSlot() == indexedGuiItem.getIndex()) {
+                    indexedGuiItem.handleAction(event);
+                    break;
+                } else if (guiItem instanceof KeyedGuiItem keyedGuiItem && currentItem.hasItemMeta()) {
+                    if (currentItem.getItemMeta().getPersistentDataContainer().has(keyedGuiItem.getKey())) {
+                        keyedGuiItem.handleAction(event);
+                        break;
+                    }
+                }
             }
         }
+
         this.onInventoryClick(event);
     }
 
