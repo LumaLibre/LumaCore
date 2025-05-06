@@ -60,7 +60,7 @@ public abstract class AbstractGui<I extends AbstractGuiItem> implements Inventor
     protected void autoRegister() {
         for (Field field : this.getClass().getDeclaredFields()) {
             field.setAccessible(true);
-            if (!GuiItem.class.isAssignableFrom(field.getType())) continue;
+            if (!AbstractGuiItem.class.isAssignableFrom(field.getType())) continue;
             try {
                 I guiItem = (I) field.get(this);
                 if (guiItem != null) {
