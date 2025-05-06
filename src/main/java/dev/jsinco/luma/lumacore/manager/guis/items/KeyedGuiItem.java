@@ -14,4 +14,8 @@ public non-sealed class KeyedGuiItem extends AbstractGuiItem {
         super(itemStack, action);
         this.key = key;
     }
+
+    public static KeyedGuiItem of(NamespacedKey key, ItemStack itemStack, GuiItemAction action) {
+        return new KeyedGuiItem(key, itemStack, action);
+    }
 }

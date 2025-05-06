@@ -13,4 +13,8 @@ public non-sealed class IndexedGuiItem extends AbstractGuiItem {
         super(itemStack, action);
         this.index = index;
     }
+
+    public static IndexedGuiItem of(int index, ItemStack itemStack, GuiItemAction action) {
+        return new IndexedGuiItem(index, itemStack, action);
+    }
 }
