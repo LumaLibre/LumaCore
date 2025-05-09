@@ -16,18 +16,18 @@ import java.lang.reflect.Field;
 import java.util.HashSet;
 import java.util.Set;
 
-public abstract class AbstractGui<I extends AbstractGuiItem> implements InventoryHolder {
+public abstract class AbstractGui implements InventoryHolder {
 
-    protected final Set<I> guiItemsMap = new HashSet<>();
+    protected final Set<AbstractGuiItem> guiItemsMap = new HashSet<>();
 
-    public void addItem(I guiItem) {
+    public void addItem(AbstractGuiItem guiItem) {
         guiItemsMap.add(guiItem);
         if (guiItem instanceof IndexedGuiItem indexedGuiItem) {
             this.getInventory().setItem(indexedGuiItem.getIndex(), indexedGuiItem.getItemStack());
         }
     }
 
-    public void removeItem(I guiItem) {
+    public void removeItem(AbstractGuiItem guiItem) {
         guiItemsMap.remove(guiItem);
         if (guiItem instanceof IndexedGuiItem indexedGuiItem) {
             this.getInventory().setItem(indexedGuiItem.getIndex(), null);
@@ -63,7 +63,7 @@ public abstract class AbstractGui<I extends AbstractGuiItem> implements Inventor
             if (!AbstractGuiItem.class.isAssignableFrom(field.getType())) continue;
 
             try {
-                I guiItem = (I) field.get(this);
+                AbstractGuiItem guiItem = (AbstractGuiItem) field.get(this);
                 if (guiItem != null) {
                     this.addItem(guiItem);
                 } else {
