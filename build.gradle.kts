@@ -7,7 +7,6 @@ plugins {
     id("maven-publish")
     kotlin("jvm")
     id("com.gradleup.shadow") version("8.3.5")
-    id("io.papermc.paperweight.userdev") version("1.7.5")
 }
 
 group = "dev.jsinco.luma.lumacore"
@@ -23,7 +22,7 @@ repositories {
 }
 
 dependencies {
-    paperweight.paperDevBundle("1.21.3-R0.1-SNAPSHOT")
+    compileOnly("io.papermc.paper:paper-api:1.21.3-R0.1-SNAPSHOT")
 
     compileOnly("me.clip:placeholderapi:2.11.6")
     // Lombok
@@ -35,23 +34,8 @@ dependencies {
 }
 
 tasks {
-    test {
-        useJUnitPlatform()
-    }
     build {
         dependsOn(shadowJar)
-    }
-    assemble {
-        dependsOn(reobfJar)
-    }
-    reobfJar {
-        outputJar.set(
-            layout.buildDirectory.file(
-                "${projectDir}${File.separator}build${File.separator}libs${File.separator}${project.name}.jar"
-            )
-        )
-
-
     }
     shadowJar {
         relocate("fr.skytasul.glowingentities", "dev.jsinco.luma.lumacore.glowingentities")
@@ -72,6 +56,7 @@ tasks {
         options.encoding = charset
     }
     jar {
+        version = ""
         enabled = false
     }
 }
