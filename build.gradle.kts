@@ -54,7 +54,6 @@ tasks {
 
     }
     shadowJar {
-        //
         relocate("fr.skytasul.glowingentities", "dev.jsinco.luma.lumacore.glowingentities")
         dependencies {
             include(dependency("org.jetbrains.kotlin:kotlin-stdlib"))
@@ -101,12 +100,13 @@ publishing {
             }
         }
     }
+
     publications {
         create<MavenPublication>("maven") {
             groupId = project.group.toString()
             artifactId = project.name
             version = project.version.toString()
-            artifact(tasks.shadowJar.get().archiveFile) {
+            artifact(tasks.shadowJar.get().archiveFile.get().asFile) {
                 builtBy(tasks.shadowJar)
             }
         }
