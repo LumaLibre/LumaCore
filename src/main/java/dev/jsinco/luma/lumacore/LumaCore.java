@@ -1,17 +1,19 @@
 package dev.jsinco.luma.lumacore;
 
 import dev.jsinco.luma.lumacore.manager.modules.ModuleManager;
+import fr.skytasul.glowingentities.GlowingEntities;
 import lombok.Getter;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class LumaCore extends JavaPlugin {
 
-    // TODO: I really need to fixup this project. Concept is cool, api frontend is okay,
-    //  backend is HORRIBLE/incomplete
+    // Todo: fixup this project
 
     @Getter
     private static LumaCore instance;
     private static ModuleManager coreModuleManager;
+    @Getter
+    private static GlowingEntities glowingEntities;
     @Getter
     private static boolean withPlaceholderAPI;
 
@@ -31,4 +33,5 @@ public class LumaCore extends JavaPlugin {
     public void onDisable() {
         coreModuleManager.unregisterModules();
     }
+
 }
