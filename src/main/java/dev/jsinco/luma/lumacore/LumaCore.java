@@ -13,15 +13,12 @@ public class LumaCore extends JavaPlugin {
     private static LumaCore instance;
     private static ModuleManager coreModuleManager;
     @Getter
-    private static GlowingEntities glowingEntities;
-    @Getter
     private static boolean withPlaceholderAPI;
 
     @Override
     public void onLoad() {
         instance = this;
         coreModuleManager = new ModuleManager(this);
-        glowingEntities = new GlowingEntities(this);
         withPlaceholderAPI = getServer().getPluginManager().getPlugin("PlaceholderAPI") != null;
     }
 

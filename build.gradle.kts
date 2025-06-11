@@ -29,7 +29,6 @@ dependencies {
     compileOnly("org.projectlombok:lombok:1.18.30")
     annotationProcessor("org.projectlombok:lombok:1.18.30")
     implementation("org.jetbrains.kotlin:kotlin-stdlib:2.1.0")
-    implementation("fr.skytasul:glowingentities:1.4.4")
 
 }
 
@@ -38,10 +37,10 @@ tasks {
         dependsOn(shadowJar)
     }
     shadowJar {
-        relocate("fr.skytasul.glowingentities", "dev.jsinco.luma.lumacore.glowingentities")
-//        dependencies {
-//            include(dependency("org.jetbrains.kotlin:kotlin-stdlib"))
-//        }
+        dependencies {
+            include(dependency("org.jetbrains.kotlin:kotlin-stdlib"))
+        }
+        archiveVersion.set("")
         archiveClassifier.set("")
     }
     processResources {
@@ -56,7 +55,7 @@ tasks {
         options.encoding = charset
     }
     jar {
-        version = ""
+        archiveVersion = null
         enabled = false
     }
 }
