@@ -54,6 +54,7 @@ tasks {
 
     }
     shadowJar {
+        //
         relocate("fr.skytasul.glowingentities", "dev.jsinco.luma.lumacore.glowingentities")
         dependencies {
             include(dependency("org.jetbrains.kotlin:kotlin-stdlib"))
