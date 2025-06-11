@@ -32,8 +32,6 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib:2.1.0")
     implementation("fr.skytasul:glowingentities:1.4.4")
 
-    testImplementation(platform("org.junit:junit-bom:5.10.0"))
-    testImplementation("org.junit.jupiter:junit-jupiter")
 }
 
 tasks {
@@ -56,8 +54,8 @@ tasks {
 
     }
     shadowJar {
+        relocate("fr.skytasul.glowingentities", "dev.jsinco.luma.lumacore.glowingentities")
         dependencies {
-            include(dependency("fr.skytasul:glowingentities"))
             include(dependency("org.jetbrains.kotlin:kotlin-stdlib"))
         }
         archiveClassifier.set("")

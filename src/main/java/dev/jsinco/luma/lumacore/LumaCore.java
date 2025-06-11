@@ -21,6 +21,7 @@ public class LumaCore extends JavaPlugin {
     public void onLoad() {
         instance = this;
         coreModuleManager = new ModuleManager(this);
+        glowingEntities = new GlowingEntities(this);
         withPlaceholderAPI = getServer().getPluginManager().getPlugin("PlaceholderAPI") != null;
     }
 
