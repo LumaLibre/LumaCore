@@ -1,7 +1,6 @@
 package dev.jsinco.luma.lumacore;
 
 import dev.jsinco.luma.lumacore.manager.modules.ModuleManager;
-import fr.skytasul.glowingentities.GlowingEntities;
 import lombok.Getter;
 import org.bukkit.plugin.java.JavaPlugin;
 
