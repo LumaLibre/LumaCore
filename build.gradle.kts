@@ -39,9 +39,9 @@ tasks {
     }
     shadowJar {
         relocate("fr.skytasul.glowingentities", "dev.jsinco.luma.lumacore.glowingentities")
-        dependencies {
-            include(dependency("org.jetbrains.kotlin:kotlin-stdlib"))
-        }
+//        dependencies {
+//            include(dependency("org.jetbrains.kotlin:kotlin-stdlib"))
+//        }
         archiveClassifier.set("")
     }
     processResources {
@@ -91,7 +91,7 @@ publishing {
             groupId = project.group.toString()
             artifactId = project.name
             version = project.version.toString()
-            artifact(tasks.shadowJar.get().archiveFile.get().asFile) {
+            artifact(tasks.shadowJar.get().archiveFile) {
                 builtBy(tasks.shadowJar)
             }
         }
