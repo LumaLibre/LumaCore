@@ -1,6 +1,7 @@
 package dev.jsinco.luma.lumacore.manager.modules;
 
 import dev.jsinco.luma.lumacore.LumaCore;
+import dev.jsinco.luma.lumacore.manager.models.BoilerPlate;
 import dev.jsinco.luma.lumacore.manager.commands.AbstractCommandManager;
 import dev.jsinco.luma.lumacore.manager.commands.AbstractSubCommand;
 import dev.jsinco.luma.lumacore.manager.placeholder.AbstractPlaceholder;
@@ -86,6 +87,10 @@ public class ModuleManager {
                     queuedPlaceholders.add(placeholder);
                 }
 
+                if (types.contains(RegisterType.BOILERPLATE) && instance instanceof BoilerPlate boilerPlate) {
+                    boilerPlate.register();
+                }
+
             } catch (NoSuchMethodException ignored) {
                 // If the class doesn't have a no-args constructor, has to be registered manually
                 Logging.warningLog("Class " + aClass.getCanonicalName() + " does not have a no-args constructor, skipping.");
@@ -142,9 +147,9 @@ public class ModuleManager {
             if (types.contains(RegisterType.PLACEHOLDER) && module instanceof AbstractPlaceholderManager<?, ?> placeholderManager) {
                 unregisterForPlaceholderManager(placeholderManager);
             }
-//            if (types.contains(RegisterType.SUBCOMMAND) && module instanceof AbstractSubCommand abstractSubCommand) {
-//                unregisterForSubcommand(abstractSubCommand);
-//            }
+            if (types.contains(RegisterType.BOILERPLATE) && module instanceof BoilerPlate boilerPlate) {
+                boilerPlate.unregister();
+            }
         }
     }
 

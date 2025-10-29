@@ -4,5 +4,6 @@ public enum RegisterType {
     LISTENER,
     COMMAND,
     SUBCOMMAND,
-    PLACEHOLDER
+    PLACEHOLDER,
+    BOILERPLATE
 }

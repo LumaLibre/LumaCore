@@ -82,7 +82,7 @@ public final class ReflectionUtil {
                 .map(ClassPath.ClassInfo::getName)
                 .map(name -> {
                     try {
-                        return Class.forName(name, false, base.getClassLoader());
+                        return Class.forName(name, false, classLoader);
                     } catch (ClassNotFoundException e) {
                         Logging.errorLog("Error while loading class", e);
                         return null;
