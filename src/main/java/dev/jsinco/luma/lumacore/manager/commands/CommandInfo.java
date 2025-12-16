@@ -16,5 +16,5 @@ public @interface CommandInfo {
     String[] aliases() default {};
     Class<? extends AbstractCommandManager> parent() default AbstractCommandManager.class;
     boolean playerOnly() default false;
-    String usage() default "";
+    String usage() default "/<command>";
 }

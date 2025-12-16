@@ -1,5 +1,6 @@
 package dev.jsinco.luma.lumacore.manager.commands;
 
+import dev.jsinco.luma.lumacore.utility.Text;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -36,7 +37,7 @@ public abstract class AbstractCommandManager<P extends JavaPlugin, T extends Abs
         String[] newArgs = new String[args.length - 1];
         System.arraycopy(args, 1, newArgs, 0, args.length - 1);
         if (!subCommand.execute(plugin, sender, label, newArgs)) {
-            sender.sendMessage("Invalid usage. Usage: " + subCommand.info().usage());
+            Text.msg(sender, "Invalid usage. Usage: " + subCommand.info().usage().replace("<command>", label));
         }
         return true;
     }
