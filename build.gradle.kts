@@ -9,7 +9,7 @@ plugins {
     id("com.gradleup.shadow") version("8.3.5")
 }
 
-group = "dev.jsinco.luma.lumacore"
+group = "dev.lumas.lumacore"
 version = getGitCommitHashShort()
 
 val jdkVersion: Int = 21
@@ -22,7 +22,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly("io.papermc.paper:paper-api:1.21.3-R0.1-SNAPSHOT")
+    compileOnly("io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT")
 
     compileOnly("me.clip:placeholderapi:2.11.6")
     // Lombok
@@ -76,8 +76,8 @@ publishing {
             url = uri("https://repo.jsinco.dev/releases")
             credentials(PasswordCredentials::class) {
                 // get from environment
-                username = System.getenv("repo_username")
-                password = System.getenv("repo_secret")
+                username = System.getenv("REPO_USERNAME")
+                password = System.getenv("REPO_PASSWORD")
             }
             authentication {
                 create<BasicAuthentication>("basic")
