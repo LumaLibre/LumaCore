@@ -93,7 +93,7 @@ public final class ReflectionUtil {
                 .filter(clazz -> {
                     try {
                         return !clazz.isAnnotationPresent(ReflectIgnore.class);
-                    } catch (NoClassDefFoundError e) {
+                    } catch (NoClassDefFoundError | TypeNotPresentException e) {
                         return false;
                     }
                 })
