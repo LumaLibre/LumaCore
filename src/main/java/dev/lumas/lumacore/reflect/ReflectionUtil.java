@@ -92,8 +92,9 @@ public final class ReflectionUtil {
                 .filter(Objects::nonNull)
                 .filter(clazz -> {
                     try {
+                        clazz.getDeclaredAnnotations();
                         return !clazz.isAnnotationPresent(ReflectIgnore.class);
-                    } catch (NoClassDefFoundError | TypeNotPresentException e) {
+                    } catch (Throwable e) {
                         return false;
                     }
                 })
