@@ -90,7 +90,13 @@ public final class ReflectionUtil {
                     }
                 })
                 .filter(Objects::nonNull)
-                .filter(clazz -> !clazz.isAnnotationPresent(ReflectIgnore.class))
+                .filter(clazz -> {
+                    try {
+                        return !clazz.isAnnotationPresent(ReflectIgnore.class);
+                    } catch (NoClassDefFoundError e) {
+                        return false;
+                    }
+                })
                 .collect(Collectors.toSet());
 
         if (classes.isEmpty()) {
