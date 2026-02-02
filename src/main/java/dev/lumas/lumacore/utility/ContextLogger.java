@@ -2,6 +2,7 @@ package dev.lumas.lumacore.utility;
 
 import lombok.Getter;
 import lombok.Setter;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Bukkit;
@@ -15,11 +16,13 @@ public class ContextLogger {
 
     private final String callerClassName;
     private final String simpleCallerClassName;
+    private final @Nullable TextColor standardColor;
     private boolean deep;
 
-    private ContextLogger(String callerClassName, String simpleCallerClassName, boolean deep) {
+    private ContextLogger(String callerClassName, String simpleCallerClassName, @Nullable TextColor standardColor, boolean deep) {
         this.callerClassName = callerClassName;
         this.simpleCallerClassName = simpleCallerClassName;
+        this.standardColor = standardColor;
         this.deep = deep;
     }
 
@@ -39,7 +42,8 @@ public class ContextLogger {
             prefix = "[%s::%s] ".formatted(simpleCallerClassName, callerMethodName);
         }
 
-        Bukkit.getConsoleSender().sendMessage(Text.mm(prefix + msg).color(textColor));
+        Component component = Text.mm(prefix + msg).color(textColor).colorIfAbsent(standardColor);
+        Bukkit.getConsoleSender().sendMessage(component);
     }
 
 
@@ -108,13 +112,17 @@ public class ContextLogger {
     }
 
 
-    public static ContextLogger getLogger(boolean deep) {
+    public static ContextLogger getLogger(@Nullable TextColor color, boolean deep) {
         StackWalker.StackFrame frame = STACK_WALKER.walk(frames -> frames.skip(1).findFirst()).orElse(null);
 
         String callerClassName = frame != null ? frame.getClassName() : "UnknownClass";
         String simpleCallerClassName = frame != null ? frame.getDeclaringClass().getSimpleName() : "UnknownClass";
 
-        return new ContextLogger(callerClassName, simpleCallerClassName, deep);
+        return new ContextLogger(callerClassName, simpleCallerClassName, color, deep);
+    }
+
+    public static ContextLogger getLogger(boolean deep) {
+        return getLogger(null, deep);
     }
 
     public static ContextLogger getLogger() {
