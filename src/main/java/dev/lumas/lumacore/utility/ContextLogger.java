@@ -9,7 +9,7 @@ import org.jetbrains.annotations.Nullable;
 
 @Getter
 @Setter
-public class LogUtil {
+public class ContextLogger {
 
     private static final StackWalker STACK_WALKER = StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE);
 
@@ -17,7 +17,7 @@ public class LogUtil {
     private final String simpleCallerClassName;
     private boolean alwaysShowCallerMethod;
 
-    private LogUtil(String callerClassName, String simpleCallerClassName, boolean alwaysShowCallerMethod) {
+    private ContextLogger(String callerClassName, String simpleCallerClassName, boolean alwaysShowCallerMethod) {
         this.callerClassName = callerClassName;
         this.simpleCallerClassName = simpleCallerClassName;
         this.alwaysShowCallerMethod = alwaysShowCallerMethod;
@@ -108,16 +108,16 @@ public class LogUtil {
     }
 
 
-    public static LogUtil getLogger(boolean alwaysShowCallerMethod) {
+    public static ContextLogger getLogger(boolean alwaysShowCallerMethod) {
         StackWalker.StackFrame frame = STACK_WALKER.walk(frames -> frames.skip(1).findFirst()).orElse(null);
 
         String callerClassName = frame != null ? frame.getClassName() : "UnknownClass";
         String simpleCallerClassName = frame != null ? frame.getDeclaringClass().getSimpleName() : "UnknownClass";
 
-        return new LogUtil(callerClassName, simpleCallerClassName, alwaysShowCallerMethod);
+        return new ContextLogger(callerClassName, simpleCallerClassName, alwaysShowCallerMethod);
     }
 
-    public static LogUtil getLogger() {
+    public static ContextLogger getLogger() {
         return getLogger(false);
     }
 }
