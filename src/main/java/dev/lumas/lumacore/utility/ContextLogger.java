@@ -12,6 +12,7 @@ import org.jetbrains.annotations.Nullable;
 @Setter
 public class ContextLogger {
 
+    private static final int BASE_SKIP_DEPTH = 2;
     private static final StackWalker STACK_WALKER = StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE);
 
     private final String callerClassName;
@@ -112,8 +113,11 @@ public class ContextLogger {
     }
 
 
-    public static ContextLogger getLogger(@Nullable TextColor color, boolean deep) {
-        StackWalker.StackFrame frame = STACK_WALKER.walk(frames -> frames.skip(1).findFirst()).orElse(null);
+
+    private static ContextLogger getLoggerInternal(@Nullable TextColor color, boolean deep, int skipFrames) {
+        StackWalker.StackFrame frame = STACK_WALKER.walk(frames ->
+                frames.skip(skipFrames).findFirst()
+        ).orElse(null);
 
         String callerClassName = frame != null ? frame.getClassName() : "UnknownClass";
         String simpleCallerClassName = frame != null ? frame.getDeclaringClass().getSimpleName() : "UnknownClass";
@@ -121,15 +125,19 @@ public class ContextLogger {
         return new ContextLogger(callerClassName, simpleCallerClassName, color, deep);
     }
 
+    public static ContextLogger getLogger(@Nullable TextColor color, boolean deep) {
+        return getLoggerInternal(color, deep, BASE_SKIP_DEPTH);
+    }
+
     public static ContextLogger getLogger(@Nullable TextColor color) {
-        return getLogger(color, false);
+        return getLoggerInternal(color, false, BASE_SKIP_DEPTH);
     }
 
     public static ContextLogger getLogger(boolean deep) {
-        return getLogger(null, deep);
+        return getLoggerInternal(null, deep, BASE_SKIP_DEPTH);
     }
 
     public static ContextLogger getLogger() {
-        return getLogger(null, false);
+        return getLoggerInternal(null, false, BASE_SKIP_DEPTH);
     }
 }
