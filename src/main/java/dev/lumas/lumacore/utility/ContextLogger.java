@@ -121,11 +121,15 @@ public class ContextLogger {
         return new ContextLogger(callerClassName, simpleCallerClassName, color, deep);
     }
 
+    public static ContextLogger getLogger(@Nullable TextColor color) {
+        return getLogger(color, false);
+    }
+
     public static ContextLogger getLogger(boolean deep) {
         return getLogger(null, deep);
     }
 
     public static ContextLogger getLogger() {
-        return getLogger(false);
+        return getLogger(null, false);
     }
 }
