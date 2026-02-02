@@ -15,12 +15,12 @@ public class ContextLogger {
 
     private final String callerClassName;
     private final String simpleCallerClassName;
-    private boolean alwaysShowCallerMethod;
+    private boolean deep;
 
-    private ContextLogger(String callerClassName, String simpleCallerClassName, boolean alwaysShowCallerMethod) {
+    private ContextLogger(String callerClassName, String simpleCallerClassName, boolean deep) {
         this.callerClassName = callerClassName;
         this.simpleCallerClassName = simpleCallerClassName;
-        this.alwaysShowCallerMethod = alwaysShowCallerMethod;
+        this.deep = deep;
     }
 
 
@@ -28,7 +28,7 @@ public class ContextLogger {
         String prefix = "[%s] ".formatted(simpleCallerClassName);
 
 
-        final int finalDepth = alwaysShowCallerMethod ? Math.max(depth, 1) : depth;
+        final int finalDepth = deep && depth == 0 ? 3 : depth;
 
         if (finalDepth > 0) {
             StackWalker.StackFrame frame = STACK_WALKER.walk(frames ->
@@ -108,13 +108,13 @@ public class ContextLogger {
     }
 
 
-    public static ContextLogger getLogger(boolean alwaysShowCallerMethod) {
+    public static ContextLogger getLogger(boolean deep) {
         StackWalker.StackFrame frame = STACK_WALKER.walk(frames -> frames.skip(1).findFirst()).orElse(null);
 
         String callerClassName = frame != null ? frame.getClassName() : "UnknownClass";
         String simpleCallerClassName = frame != null ? frame.getDeclaringClass().getSimpleName() : "UnknownClass";
 
-        return new ContextLogger(callerClassName, simpleCallerClassName, alwaysShowCallerMethod);
+        return new ContextLogger(callerClassName, simpleCallerClassName, deep);
     }
 
     public static ContextLogger getLogger() {
