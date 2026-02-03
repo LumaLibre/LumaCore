@@ -3,5 +3,5 @@ main: dev.lumas.lumacore.LumaCore
 version: '${version}'
 api-version: 1.21
 author: 'Jsinco'
-#load: STARTUP
+folia-supported: true
 softdepend: [PlaceholderAPI]

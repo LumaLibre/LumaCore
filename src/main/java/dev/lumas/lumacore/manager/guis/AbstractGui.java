@@ -93,8 +93,8 @@ public abstract class AbstractGui implements InventoryHolder {
 
 
     public void open(HumanEntity humanEntity) {
-        if (!Bukkit.isPrimaryThread()) {
-            Bukkit.getScheduler().runTask(LumaCore.getInstance(), () -> humanEntity.openInventory(this.getInventory()));
+        if (!Bukkit.isOwnedByCurrentRegion(humanEntity)) {
+            humanEntity.getScheduler().execute(LumaCore.getInstance(), () -> humanEntity.openInventory(this.getInventory()), null, 1);
         } else {
             humanEntity.openInventory(this.getInventory());
         }
