@@ -40,4 +40,9 @@ public abstract class SoloAbstractPlaceholder extends PlaceholderExpansion {
     public @NotNull String getVersion() {
         return version;
     }
+
+    @Override
+    public boolean persist() {
+        return true;
+    }
 }
