@@ -1,7 +1,0 @@
-name: LumaCore
-main: dev.lumas.lumacore.LumaCore
-version: '${version}'
-api-version: 1.21
-author: 'Jsinco'
-folia-supported: true
-softdepend: [PlaceholderAPI]

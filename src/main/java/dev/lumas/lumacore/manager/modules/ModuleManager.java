@@ -52,19 +52,24 @@ public class ModuleManager {
                 continue;
             }
 
+            AutoRegister annotation = aClass.getAnnotation(AutoRegister.class);
+            if (!annotation.requires().isBlank() && !requiredExists(annotation.requires())) {
+                continue;
+            }
+
             try {
                 Constructor<?> constructor = aClass.getConstructor();
                 if (Modifier.isPrivate(constructor.getModifiers())) {
                     continue;
                 }
 
-                AutoRegister annotation = aClass.getAnnotation(AutoRegister.class);
+
                 List<RegisterType> types = List.of(annotation.value());
                 Object instance = constructor.newInstance();
                 modules.add(instance);
 
                 if (types.contains(RegisterType.LISTENER) && instance instanceof Listener listener) {
-                    registerForBukkitListener(listener, annotation.listenerRequires());
+                    registerForBukkitListener(listener);
                 }
 
                 if (types.contains(RegisterType.COMMAND) && instance instanceof BukkitCommand bukkitCommand) {
@@ -136,7 +141,7 @@ public class ModuleManager {
             AutoRegister annotation = module.getClass().getAnnotation(AutoRegister.class);
             List<RegisterType> types = List.of(annotation.value());
             if (types.contains(RegisterType.LISTENER) && module instanceof Listener listener) {
-                unregisterForBukkitListener(listener, annotation.listenerRequires());
+                unregisterForBukkitListener(listener);
             }
             if (types.contains(RegisterType.COMMAND) && module instanceof BukkitCommand bukkitCommand) {
                 unregisterForBukkitCommand(bukkitCommand);
@@ -154,17 +159,11 @@ public class ModuleManager {
     }
 
 
-    private void registerForBukkitListener(Listener listener, String requires) {
-        if (!requires.isBlank() && Bukkit.getPluginManager().getPlugin(requires) == null) {
-            return;
-        }
+    private void registerForBukkitListener(Listener listener) {
         caller.getServer().getPluginManager().registerEvents(listener, caller);
     }
 
-    private void unregisterForBukkitListener(Listener listener, String requires) {
-        if (!requires.isBlank() && Bukkit.getPluginManager().getPlugin(requires) == null) {
-            return;
-        }
+    private void unregisterForBukkitListener(Listener listener) {
         HandlerList.unregisterAll(listener);
     }
 
@@ -213,6 +212,11 @@ public class ModuleManager {
         if (LumaCore.isWithPlaceholderAPI()) {
             placeholderManager.unregister();
         }
+    }
+
+
+    private boolean requiredExists(String string) {
+        return Bukkit.getPluginManager().getPlugin(string) != null || ReflectionUtil.classExists(string);
     }
 }
 

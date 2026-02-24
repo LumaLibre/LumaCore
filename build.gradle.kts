@@ -7,6 +7,7 @@ plugins {
     id("maven-publish")
     kotlin("jvm")
     id("com.gradleup.shadow") version("8.3.5")
+    id("de.eldoria.plugin-yml.bukkit") version("0.7.1")
 }
 
 group = "dev.lumas.lumacore"
@@ -93,9 +94,23 @@ publishing {
             artifact(tasks.shadowJar.get().archiveFile) {
                 builtBy(tasks.shadowJar)
             }
+
+            artifact(tasks.named("sourcesJar").get())
         }
     }
 }
+
+
+bukkit {
+    name = "LumaCore"
+    main = "dev.lumas.lumacore.LumaCore"
+    version = project.version.toString()
+    apiVersion = "1.21"
+    author = "Jsinco"
+    softDepend = listOf("PlaceholderAPI")
+    foliaSupported = true
+}
+
 
 fun getGitCommitHashShort(): String = ByteArrayOutputStream().use { stream ->
     var branch = "none"
