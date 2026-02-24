@@ -20,8 +20,8 @@ public abstract class AbstractPlaceholderManager<P extends JavaPlugin, T extends
         this.plugin = plugin;
     }
 
-    protected AbstractPlaceholderManager(P plugin, String identifier, String author, String version) {
-        super(identifier, author, version);
+    protected AbstractPlaceholderManager(P plugin, String identifier, String author, String version, boolean persist) {
+        super(identifier, author, version, persist);
         this.plugin = plugin;
     }
 
