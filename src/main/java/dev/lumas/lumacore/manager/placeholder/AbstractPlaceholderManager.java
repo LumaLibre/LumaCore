@@ -49,7 +49,7 @@ public abstract class AbstractPlaceholderManager<P extends JavaPlugin, T extends
         }
     }
 
-    public void removeSubCommand(AbstractSubCommand<?> abstractPlaceholder) {
+    public void removePlaceholder(AbstractSubCommand<?> abstractPlaceholder) {
         placeholders.remove(abstractPlaceholder.name());
         for (String alias : abstractPlaceholder.info().aliases()) {
             placeholders.remove(alias);
