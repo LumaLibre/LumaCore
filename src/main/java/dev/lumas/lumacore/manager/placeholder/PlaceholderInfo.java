@@ -14,6 +14,7 @@ public @interface PlaceholderInfo {
     // Parent
     String author() default "";
     String version() default "";
+    boolean persist() default true;
 
 
     // Child

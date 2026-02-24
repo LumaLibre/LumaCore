@@ -8,6 +8,7 @@ public abstract class SoloAbstractPlaceholder extends PlaceholderExpansion {
     protected final String identifier;
     protected final String author;
     protected final String version;
+    protected final boolean persist;
 
     public SoloAbstractPlaceholder() {
         PlaceholderInfo info = getClass().getAnnotation(PlaceholderInfo.class);
@@ -17,12 +18,14 @@ public abstract class SoloAbstractPlaceholder extends PlaceholderExpansion {
         this.identifier = info.identifier();
         this.author = info.author();
         this.version = info.version();
+        this.persist = info.persist();
     }
 
-    public SoloAbstractPlaceholder(String identifier, String author, String version) {
+    public SoloAbstractPlaceholder(String identifier, String author, String version, boolean persist) {
         this.identifier = identifier;
         this.author = author;
         this.version = version;
+        this.persist = persist;
     }
 
 
@@ -43,6 +46,6 @@ public abstract class SoloAbstractPlaceholder extends PlaceholderExpansion {
 
     @Override
     public boolean persist() {
-        return true;
+        return persist;
     }
 }
