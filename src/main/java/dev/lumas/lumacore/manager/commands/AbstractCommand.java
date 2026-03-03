@@ -63,7 +63,7 @@ public abstract class AbstractCommand extends BukkitCommand {
     }
 
     @Override
-    public boolean execute(@NotNull CommandSender commandSender, @NotNull String s, @NotNull String[] strings) {
+    public boolean execute(@NotNull CommandSender commandSender, @NotNull String s, @NotNull String @NotNull[] strings) {
         if (playerOnly && !(commandSender instanceof Player)) {
             Text.msg(commandSender, "This command can only be executed by players.");
             return true;

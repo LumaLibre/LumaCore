@@ -2,15 +2,17 @@ package dev.lumas.lumacore.manager.commands;
 
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
 public interface AbstractSubCommand<P extends JavaPlugin> {
 
 
-    boolean execute(P plugin, CommandSender sender, String label, String[] args);
+    boolean execute(@NotNull P plugin, @NotNull CommandSender sender, @NotNull String label, @NotNull String @NotNull[] args);
 
-    List<String> tabComplete(P plugin, CommandSender sender, String[] args);
+    @Nullable List<@NotNull String> tabComplete(@NotNull P plugin, @NotNull CommandSender sender, @NotNull String @NotNull[] args);
 
     default Class<? extends AbstractCommandManager> parent() {
         return info().parent();

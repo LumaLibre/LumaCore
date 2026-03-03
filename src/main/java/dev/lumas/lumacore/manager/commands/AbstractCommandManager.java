@@ -22,7 +22,7 @@ public abstract class AbstractCommandManager<P extends JavaPlugin, T extends Abs
     }
 
     @Override
-    public boolean handle(@NotNull CommandSender sender, @NotNull String label, String[] args) {
+    public boolean handle(@NotNull CommandSender sender, @NotNull String label, @NotNull String @NotNull[] args) {
         if (args.length == 0 || !subCommands.containsKey(args[0])) {
             return false;
         }
@@ -44,7 +44,7 @@ public abstract class AbstractCommandManager<P extends JavaPlugin, T extends Abs
 
 
     @Override
-    public @Nullable List<String> handleTabComplete(@NotNull CommandSender sender, @NotNull String label, String[] args) {
+    public @Nullable List<String> handleTabComplete(@NotNull CommandSender sender, @NotNull String label, @NotNull String @NotNull[] args) {
         if (args.length == 0) {
             return null;
         } else if (args.length == 1) {
