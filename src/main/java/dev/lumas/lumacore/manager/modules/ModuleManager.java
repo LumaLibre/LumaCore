@@ -1,7 +1,7 @@
 package dev.lumas.lumacore.manager.modules;
 
 import dev.lumas.lumacore.LumaCore;
-import dev.lumas.lumacore.manager.models.BoilerPlate;
+import dev.lumas.lumacore.manager.models.Service;
 import dev.lumas.lumacore.manager.commands.AbstractCommandManager;
 import dev.lumas.lumacore.manager.commands.AbstractSubCommand;
 import dev.lumas.lumacore.manager.placeholder.AbstractPlaceholder;
@@ -92,8 +92,8 @@ public class ModuleManager {
                     queuedPlaceholders.add(placeholder);
                 }
 
-                if (types.contains(RegisterType.BOILERPLATE) && instance instanceof BoilerPlate boilerPlate) {
-                    boilerPlate.register();
+                if (types.contains(RegisterType.SERVICE) && instance instanceof Service service) {
+                    service.register();
                 }
 
             } catch (NoSuchMethodException ignored) {
@@ -152,8 +152,8 @@ public class ModuleManager {
             if (types.contains(RegisterType.PLACEHOLDER) && module instanceof AbstractPlaceholderManager<?, ?> placeholderManager) {
                 unregisterForPlaceholderManager(placeholderManager);
             }
-            if (types.contains(RegisterType.BOILERPLATE) && module instanceof BoilerPlate boilerPlate) {
-                boilerPlate.unregister();
+            if (types.contains(RegisterType.SERVICE) && module instanceof Service service) {
+                service.unregister();
             }
         }
     }

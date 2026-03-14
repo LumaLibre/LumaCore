@@ -5,5 +5,5 @@ public enum RegisterType {
     COMMAND,
     SUBCOMMAND,
     PLACEHOLDER,
-    BOILERPLATE
+    SERVICE
 }

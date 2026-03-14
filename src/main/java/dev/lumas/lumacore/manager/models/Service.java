@@ -1,6 +1,6 @@
 package dev.lumas.lumacore.manager.models;
 
-public interface BoilerPlate {
+public interface Service {
     void register();
 
     void unregister();
