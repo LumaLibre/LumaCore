@@ -6,8 +6,10 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
+import org.jspecify.annotations.NullMarked;
 
 @Getter
+@NullMarked
 public non-sealed class KeyedGuiItem extends AbstractGuiItem {
 
     protected NamespacedKey key;

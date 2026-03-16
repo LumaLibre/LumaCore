@@ -1,7 +1,9 @@
 package dev.lumas.core.model.internal;
 
 import dev.lumas.core.model.ModuleContext;
+import org.jspecify.annotations.NullMarked;
 
+@NullMarked
 public interface RegisterHandler<T> {
 
     void register(T instance, ModuleContext context);

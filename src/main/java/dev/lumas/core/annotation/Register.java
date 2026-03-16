@@ -5,6 +5,12 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * An annotation for automatically reflecting over and
+ * registering a class with the specified type(s) of registration.
+ *
+ * @see Autowire
+ */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Register {

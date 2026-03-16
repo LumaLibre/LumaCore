@@ -1,14 +1,19 @@
 package dev.lumas.core.util;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.command.CommandSender;
+import org.jspecify.annotations.NullMarked;
 
 import java.util.List;
 import java.util.stream.Stream;
 
-public class Text {
+@NullMarked
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class Text {
 
     public static final Component PREFIX = mm("<b><#b986f9>Info</#b986f9></b> <dark_gray>»</dark_gray> ");
 

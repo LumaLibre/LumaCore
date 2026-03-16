@@ -7,12 +7,14 @@ import dev.lumas.core.model.command.AbstractSubCommand;
 import dev.lumas.core.model.internal.RegisterHandler;
 import dev.lumas.core.util.Logging;
 import org.bukkit.Bukkit;
+import org.jspecify.annotations.NullMarked;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+@NullMarked
 public class CommandHandler implements RegisterHandler<AbstractCommand> {
 
     private final Map<AbstractCommandManager<?, ?>, List<AbstractSubCommand<?>>> managers = new LinkedHashMap<>();
@@ -50,7 +52,7 @@ public class CommandHandler implements RegisterHandler<AbstractCommand> {
                 Logging.warningLog("No parent CommandManager for: " + sub.getClass().getSimpleName());
                 continue;
             }
-            parent.addSubCommand(sub);
+            parent.addUntyped(sub);
         }
         queuedSubCommands.clear();
     }

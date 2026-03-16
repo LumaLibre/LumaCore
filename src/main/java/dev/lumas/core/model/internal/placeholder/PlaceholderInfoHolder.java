@@ -2,7 +2,9 @@ package dev.lumas.core.model.internal.placeholder;
 
 import dev.lumas.core.model.placeholder.AbstractPlaceholderManager;
 import dev.lumas.lumacore.manager.placeholder.PlaceholderInfo;
+import org.jspecify.annotations.NullMarked;
 
+@NullMarked
 public record PlaceholderInfoHolder(PlaceholderInfo handle) implements PlaceholderAnnotation {
 
     @Override

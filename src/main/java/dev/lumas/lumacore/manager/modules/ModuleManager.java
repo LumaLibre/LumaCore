@@ -14,7 +14,7 @@ public class ModuleManager {
     private final Modules handle;
 
     public ModuleManager(JavaPlugin caller) {
-        this.handle = new Modules(caller);
+        this.handle = new Modules(caller, Modules.FALLBACK_PREFIX);
     }
 
     public void reflectivelyRegisterModules() {

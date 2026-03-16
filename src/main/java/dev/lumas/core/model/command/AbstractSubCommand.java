@@ -16,7 +16,7 @@ public interface AbstractSubCommand<P extends JavaPlugin> {
     @Nullable List<String> tabComplete(@NonNull P plugin, @NonNull CommandSender sender, @NonNull String @NonNull[] args);
 
     @NonNull
-    default Class<? extends AbstractCommandManager> parent() {
+    default Class<? extends AbstractCommandManager<?, ?>> parent() {
         return meta().parent();
     }
 
@@ -49,6 +49,7 @@ public interface AbstractSubCommand<P extends JavaPlugin> {
         return meta().description();
     }
 
+    @NonNull
     default CommandAnnotation meta() {
         CommandAnnotation meta = Annotations.getCommandMeta(this);
         if (meta == null) {

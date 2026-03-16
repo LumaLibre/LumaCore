@@ -12,6 +12,8 @@ import org.jspecify.annotations.NullMarked;
 /**
  * Defines the categories of components that can be registered
  * through the LumaCore framework.
+ *
+ * @see Register
  */
 @Getter
 @NullMarked

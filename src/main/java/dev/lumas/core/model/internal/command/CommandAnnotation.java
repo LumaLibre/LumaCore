@@ -2,7 +2,9 @@ package dev.lumas.core.model.internal.command;
 
 import dev.lumas.core.model.command.AbstractCommandManager;
 import dev.lumas.core.model.internal.AnnotationHolder;
+import org.jspecify.annotations.NullMarked;
 
+@NullMarked
 public interface CommandAnnotation extends AnnotationHolder {
 
     String name();
@@ -13,7 +15,7 @@ public interface CommandAnnotation extends AnnotationHolder {
 
     String[] aliases();
 
-    Class<? extends AbstractCommandManager> parent();
+    Class<? extends AbstractCommandManager<?, ?>> parent();
 
     boolean playerOnly();
 

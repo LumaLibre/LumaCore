@@ -19,6 +19,9 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.stream.Collectors;
 
+/**
+ * A utility manager for scanning packages and reflectively loading classes.
+ */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Reflect {
 
@@ -27,12 +30,22 @@ public final class Reflect {
     private boolean inverted = false;
     private boolean appendToBase = true;
 
+    /**
+     * Creates a new {@link Reflect} instance.
+     * @param base The base class to scan for classes.
+     * @return A new {@link Reflect} instance.
+     */
     public static Reflect from(Class<?> base) {
         Reflect reflect = new Reflect();
         reflect.base = base;
         return reflect;
     }
 
+    /**
+     * Adds packages to the scan. If empty, all packages will be scanned.
+     * @param packages The packages to scan.
+     * @return The current Reflect instance.
+     */
     public Reflect packages(String... packages) {
         for (String pack : packages) {
             if (appendToBase) {
@@ -44,16 +57,30 @@ public final class Reflect {
         return this;
     }
 
+    /**
+     * Scans for classes in the specified packages, ignoring the base package.
+     * @return The current Reflect instance.
+     */
     public Reflect absolute() {
         this.appendToBase = false;
         return this;
     }
 
+    /**
+     * Inverts the filter logic. When set, only classes that do NOT match the filters will be returned.
+     * @return The current Reflect instance.
+     */
     public Reflect inverted() {
         this.inverted = true;
         return this;
     }
 
+    /**
+     * Scans for classes in the specified packages that are assignable from the given filters.
+     * If no filters are provided, all classes will be returned.
+     * @param filters The filters to apply.
+     * @return A set of classes that match the filters.
+     */
     public Set<Class<?>> scan(Class<?>... filters) {
         String basePackage = base.getPackage().getName();
         Collection<String> targetPackages;
@@ -105,7 +132,7 @@ public final class Reflect {
                 .filter(Objects::nonNull)
                 .filter(clazz -> {
                     try {
-                        return !clazz.isAnnotationPresent(ReflectIgnore.class)  && !clazz.isAnnotationPresent(dev.lumas.lumacore.reflect.ReflectIgnore.class);
+                        return !clazz.isAnnotationPresent(ReflectIgnore.class) && !clazz.isAnnotationPresent(dev.lumas.lumacore.reflect.ReflectIgnore.class);
                     } catch (NoClassDefFoundError | TypeNotPresentException e) {
                         return false;
                     }
@@ -133,6 +160,11 @@ public final class Reflect {
         return packages;
     }
 
+    /**
+     * Checks if a class exists.
+     * @param className The canonical name of the class to check.
+     * @return True if the class exists, false otherwise.
+     */
     public static boolean classExists(String className) {
         try {
             Class.forName(className);

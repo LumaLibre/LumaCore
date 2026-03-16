@@ -4,8 +4,10 @@ import dev.lumas.core.model.gui.GuiItemAction;
 import lombok.Getter;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
+import org.jspecify.annotations.NullMarked;
 
 @Getter
+@NullMarked
 public abstract sealed class AbstractGuiItem permits IndexedGuiItem, KeyedGuiItem {
 
     protected ItemStack itemStack;

@@ -7,12 +7,14 @@ import dev.lumas.core.model.placeholder.AbstractPlaceholder;
 import dev.lumas.core.model.placeholder.AbstractPlaceholderManager;
 import dev.lumas.core.model.placeholder.SoloAbstractPlaceholder;
 import dev.lumas.core.util.Logging;
+import org.jspecify.annotations.NullMarked;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+@NullMarked
 public class PlaceholderHandler implements RegisterHandler<Object> {
 
     private final Map<AbstractPlaceholderManager<?, ?>, List<AbstractPlaceholder<?>>> managers = new LinkedHashMap<>();
@@ -53,7 +55,7 @@ public class PlaceholderHandler implements RegisterHandler<Object> {
                 Logging.warningLog("No parent PlaceholderManager for: " + placeholder.getClass().getSimpleName());
                 continue;
             }
-            parent.addPlaceholder(placeholder);
+            parent.addUntyped(placeholder);
         }
         queuedPlaceholders.clear();
     }

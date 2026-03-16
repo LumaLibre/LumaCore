@@ -14,10 +14,16 @@ import org.jspecify.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import dev.lumas.core.annotation.CommandMeta;
 
+/**
+ * Extension of Bukkit's provided {@link BukkitCommand} class
+ * with support for the {@link CommandMeta} annotation.
+ */
 @NullMarked
 public abstract class AbstractCommand extends BukkitCommand {
 
+    // JDK 21 requires args be passed in when calling super(). This string is transient.
     private static final String HOLDER = "holder";
 
     private final String permission;
@@ -57,6 +63,13 @@ public abstract class AbstractCommand extends BukkitCommand {
         this.playerOnly = info.playerOnly();
     }
 
+    /**
+     * Handles the command.
+     * @param sender Source object which is executing this command
+     * @param label The alias of the command used
+     * @param args All arguments passed to the command, split via ' '
+     * @return true if a valid command, otherwise false
+     */
     @Override
     public boolean execute(CommandSender sender, String label, String[] args) {
         if (playerOnly && !(sender instanceof Player)) {
@@ -73,8 +86,16 @@ public abstract class AbstractCommand extends BukkitCommand {
         return true;
     }
 
+    /**
+     * Handles tab completion.
+     * @param sender Source object which is executing this command
+     * @param alias the alias being used
+     * @param args All arguments passed to the command, split via ' '
+     * @return the list of tab completions, or null if no completions are available
+     * @throws IllegalArgumentException if sender, alias, or args is null
+     */
     @Override
-    public List<String> tabComplete(CommandSender sender, String alias, String[] args) throws IllegalArgumentException {
+    public List<String> tabComplete(CommandSender sender, String alias, String[] args) {
         List<String> provider = handleTabComplete(sender, alias, args);
 
         if (provider != null) {
@@ -93,14 +114,28 @@ public abstract class AbstractCommand extends BukkitCommand {
                 }
             }
 
-            Collections.sort(matchedPlayers, String.CASE_INSENSITIVE_ORDER);
+            matchedPlayers.sort(String.CASE_INSENSITIVE_ORDER);
             return matchedPlayers;
         } else {
             return ImmutableList.of();
         }
     }
 
+    /**
+     * Delegate handler.
+     * @param sender the sender of the command
+     * @param label the label of the command
+     * @param args the arguments of the command
+     * @return whether the command was handled successfully
+     */
     public abstract boolean handle(CommandSender sender, String label, String[] args);
 
+    /**
+     * Delegate handler.
+     * @param sender the sender of the command
+     * @param label the label of the command
+     * @param args the arguments of the command
+     * @return the list of tab completions, or null if no completions are available
+     */
     public abstract @Nullable List<String> handleTabComplete(CommandSender sender, String label, String[] args);
 }

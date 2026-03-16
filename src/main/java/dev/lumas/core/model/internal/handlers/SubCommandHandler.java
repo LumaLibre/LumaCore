@@ -3,7 +3,9 @@ package dev.lumas.core.model.internal.handlers;
 import dev.lumas.core.model.ModuleContext;
 import dev.lumas.core.model.command.AbstractSubCommand;
 import dev.lumas.core.model.internal.RegisterHandler;
+import org.jspecify.annotations.NullMarked;
 
+@NullMarked
 public class SubCommandHandler implements RegisterHandler<AbstractSubCommand<?>> {
 
     private final CommandHandler commandHandler;

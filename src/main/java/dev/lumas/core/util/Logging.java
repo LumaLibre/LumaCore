@@ -1,11 +1,15 @@
 package dev.lumas.core.util;
 
-import dev.lumas.core.util.Text;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
+@NullMarked
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Logging {
 
     public static void msg(CommandSender sender, String msg) {

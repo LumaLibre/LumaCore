@@ -1,29 +1,36 @@
 package dev.lumas.core.model.command;
 
+import dev.lumas.core.model.DelegateHolder;
 import dev.lumas.core.util.Text;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@NullMarked
-public abstract class AbstractCommandManager<P extends JavaPlugin, T extends AbstractSubCommand<P>> extends AbstractCommand {
+public abstract class AbstractCommandManager<P extends JavaPlugin, T extends AbstractSubCommand<P>> extends AbstractCommand implements DelegateHolder<T> {
 
     protected final Map<String, T> subCommands = new HashMap<>();
     protected final P plugin;
 
-    protected AbstractCommandManager(P plugin) {
+    protected AbstractCommandManager(@NonNull P plugin) {
         super();
         this.plugin = plugin;
     }
 
+    /**
+     * Handles the command.
+     * @param sender the sender of the command
+     * @param label the label of the command
+     * @param args the arguments of the command
+     * @return whether the command was handled successfully
+     */
     @Override
-    public boolean handle(CommandSender sender, String label, String[] args) {
+    public boolean handle(@NonNull CommandSender sender, @NonNull String label, @NonNull String @NonNull[] args) {
         if (args.length == 0 || !subCommands.containsKey(args[0])) {
             return false;
         }
@@ -44,8 +51,15 @@ public abstract class AbstractCommandManager<P extends JavaPlugin, T extends Abs
     }
 
 
+    /**
+     * Handles tab completion.
+     * @param sender the sender of the command
+     * @param label the label of the command
+     * @param args the arguments of the command
+     * @return the list of tab completions, or null if no completions are available
+     */
     @Override
-    public @Nullable List<String> handleTabComplete(CommandSender sender, String label, String[] args) {
+    public @Nullable List<String> handleTabComplete(@NonNull CommandSender sender, @NonNull String label, @NonNull String @NonNull[] args) {
         if (args.length == 0) {
             return null;
         } else if (args.length == 1) {
@@ -63,16 +77,26 @@ public abstract class AbstractCommandManager<P extends JavaPlugin, T extends Abs
         return null;
     }
 
-    public void addSubCommand(AbstractSubCommand<?> abstractSubCommand) {
-        subCommands.put(abstractSubCommand.name(), (T) abstractSubCommand);
-        for (String alias : abstractSubCommand.aliases()) {
-            subCommands.put(alias, (T) abstractSubCommand);
+    /**
+     * Adds a subcommand and all of its aliases to the registry.
+     * {@inheritDoc}
+     */
+    @Override
+    public void add(T instance) {
+        subCommands.put(instance.name(), instance);
+        for (String alias : instance.aliases()) {
+            subCommands.put(alias, instance);
         }
     }
 
-    public void removeSubCommand(AbstractSubCommand<?> abstractSubCommand) {
-        subCommands.remove(abstractSubCommand.name());
-        for (String alias : abstractSubCommand.aliases()) {
+    /**
+     * Removes a subcommand and all of its aliases from the registry.
+     * {@inheritDoc}
+     */
+    @Override
+    public void remove(T instance) {
+        subCommands.remove(instance.name());
+        for (String alias : instance.aliases()) {
             subCommands.remove(alias);
         }
     }

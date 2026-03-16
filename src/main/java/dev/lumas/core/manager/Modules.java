@@ -14,6 +14,7 @@ import dev.lumas.core.util.Logging;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
+import org.jspecify.annotations.NullMarked;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
@@ -23,15 +24,30 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * A manager for reflectively registering modules based on the presence of the {@link dev.lumas.core.annotation.Register} annotation.
+ */
+@NullMarked
 public class Modules {
+
+    public static final String FALLBACK_PREFIX = "lumacore";
 
     @Getter
     private final ModuleContext context;
     private final Map<Autowire, RegisterHandler<?>> handlers = new EnumMap<>(Autowire.class);
     private final List<Object> modules = new ArrayList<>();
 
+
     public Modules(Plugin caller) {
-        this.context = new ModuleContext(caller, "lumacore");
+        this(new ModuleContext(caller, caller.getName().toLowerCase()));
+    }
+
+    public Modules(Plugin caller, String fallbackPrefix) {
+        this(new ModuleContext(caller, fallbackPrefix));
+    }
+
+    public Modules(ModuleContext context) {
+        this.context = context;
 
         CommandHandler commandHandler = new CommandHandler();
         addHandler(Autowire.LISTENER, new ListenerHandler());
@@ -41,15 +57,31 @@ public class Modules {
         addHandler(Autowire.SERVICE, new ServiceHandler());
     }
 
+    /**
+     * Registers a handler for a specific Autowire type.
+     * This allows you to define custom registration logic for different types of modules.
+     * @param type the Autowire type to register the handler for
+     * @param handler the handler to register
+     * @param <T> the type of module handled by the handler
+     */
     public <T> void addHandler(Autowire type, RegisterHandler<T> handler) {
         handlers.put(type, handler);
     }
 
+    /**
+     * Scans the plugin's classes for those annotated with @Register and registers them using the appropriate handlers.
+     * This should be called during plugin startup.
+     */
     public void register() {
         Set<Class<?>> classes = Reflect.from(context.plugin().getClass()).scan();
         register(classes);
     }
 
+    /**
+     * Registers the given classes if they are annotated with @Register and meet the requirements specified in the annotation.
+     * This should be called during plugin startup.
+     * @param classes the classes to register
+     */
     public void register(Set<Class<?>> classes) {
         for (Class<?> aClass : classes) {
             if (aClass.isInterface() || Modifier.isAbstract(aClass.getModifiers())) continue;
@@ -80,6 +112,10 @@ public class Modules {
         Logging.log("Finished registering modules reflectively! (" + modules.size() + ")");
     }
 
+    /**
+     * Unregisters all registered modules using the appropriate handlers.
+     * This should be called during plugin shutdown to ensure proper cleanup.
+     */
     public void unregister() {
         for (Object module : modules) {
             RegisterAnnotation annotation = Annotations.getRegisterAnnotation(module.getClass());

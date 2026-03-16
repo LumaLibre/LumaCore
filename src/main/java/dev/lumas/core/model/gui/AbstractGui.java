@@ -1,6 +1,7 @@
 package dev.lumas.core.model.gui;
 
 import dev.lumas.core.LumaCore;
+import dev.lumas.core.model.DelegateHolder;
 import dev.lumas.core.model.gui.items.AbstractGuiItem;
 import dev.lumas.core.model.gui.items.IndexedGuiItem;
 import dev.lumas.core.model.gui.items.KeyedGuiItem;
@@ -12,27 +13,47 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
+import org.jspecify.annotations.NullMarked;
 
 import java.lang.reflect.Field;
 import java.util.HashSet;
 import java.util.Set;
 
-public abstract class AbstractGui implements InventoryHolder {
+/**
+ * Abstract base class for GUIs.
+ * Provides automatic registration of {@link AbstractGuiItem}s and handling of inventory events.
+ * @see KeyedGuiItem
+ * @see IndexedGuiItem
+ */
+@NullMarked
+public abstract class AbstractGui implements InventoryHolder, DelegateHolder<AbstractGuiItem> {
 
     protected final Set<AbstractGuiItem> guiItemsMap = new HashSet<>();
 
-    public void addItem(AbstractGuiItem guiItem) {
-        guiItemsMap.add(guiItem);
-        if (guiItem instanceof IndexedGuiItem indexedGuiItem) {
+    @Override
+    public void add(AbstractGuiItem instance) {
+        guiItemsMap.add(instance);
+        if (instance instanceof IndexedGuiItem indexedGuiItem) {
             this.getInventory().setItem(indexedGuiItem.getIndex(), indexedGuiItem.getItemStack());
         }
     }
 
-    public void removeItem(AbstractGuiItem guiItem) {
-        guiItemsMap.remove(guiItem);
-        if (guiItem instanceof IndexedGuiItem indexedGuiItem) {
+    @Override
+    public void remove(AbstractGuiItem instance) {
+        guiItemsMap.remove(instance);
+        if (instance instanceof IndexedGuiItem indexedGuiItem) {
             this.getInventory().setItem(indexedGuiItem.getIndex(), null);
         }
+    }
+
+    @ApiStatus.Obsolete
+    public void addItem(AbstractGuiItem guiItem) {
+        this.add(guiItem);
+    }
+
+    @ApiStatus.Obsolete
+    public void removeItem(AbstractGuiItem guiItem) {
+        this.remove(guiItem);
     }
 
     @ApiStatus.Internal

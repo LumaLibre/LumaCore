@@ -2,7 +2,9 @@ package dev.lumas.core.model.internal.command;
 
 import dev.lumas.core.annotation.CommandMeta;
 import dev.lumas.core.model.command.AbstractCommandManager;
+import org.jspecify.annotations.NullMarked;
 
+@NullMarked
 public record CommandMetaHolder(CommandMeta handle) implements CommandAnnotation {
 
     @Override

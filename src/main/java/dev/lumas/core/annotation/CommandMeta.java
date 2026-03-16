@@ -1,6 +1,8 @@
 package dev.lumas.core.annotation;
 
+import dev.lumas.core.model.command.AbstractCommand;
 import dev.lumas.core.model.command.AbstractCommandManager;
+import dev.lumas.core.model.command.AbstractSubCommand;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -8,8 +10,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotation for defining a command class with metadata such as name, description, permission, aliases, parent command, player-only status, and usage.
- * This annotation is used to mark classes that represent commands in the command management system.
+ * An annotation for defining a {@link AbstractCommand}, {@link AbstractCommandManager},
+ * or {@link AbstractSubCommand}.
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
