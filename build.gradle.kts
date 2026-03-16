@@ -7,6 +7,7 @@ plugins {
     id("io.freefair.lombok") version "9.2.0"
     id("com.gradleup.shadow") version("8.3.5")
     id("de.eldoria.plugin-yml.bukkit") version("0.7.1")
+    kotlin("jvm")
 }
 
 group = "dev.lumas.core"
