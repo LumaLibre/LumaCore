@@ -14,27 +14,22 @@ public class ContextLogger extends dev.lumas.core.util.ContextLogger {
     }
 
     public static ContextLogger getLogger(@Nullable TextColor color, boolean deep) {
-        return from(dev.lumas.core.util.ContextLogger.getLoggerInternal(color, deep, BASE_SKIP_DEPTH + 1));
+        var l = dev.lumas.core.util.ContextLogger.getLoggerInternal(color, deep, BASE_SKIP_DEPTH);
+        return new ContextLogger(l.getCallerClassName(), l.getSimpleCallerClassName(), l.getStandardColor(), l.isDeep());
     }
 
     public static ContextLogger getLogger(@Nullable TextColor color) {
-        return from(dev.lumas.core.util.ContextLogger.getLoggerInternal(color, false, BASE_SKIP_DEPTH + 1));
+        var l = dev.lumas.core.util.ContextLogger.getLoggerInternal(color, false, BASE_SKIP_DEPTH);
+        return new ContextLogger(l.getCallerClassName(), l.getSimpleCallerClassName(), l.getStandardColor(), l.isDeep());
     }
 
     public static ContextLogger getLogger(boolean deep) {
-        return from(dev.lumas.core.util.ContextLogger.getLoggerInternal(null, deep, BASE_SKIP_DEPTH + 1));
+        var l = dev.lumas.core.util.ContextLogger.getLoggerInternal(null, deep, BASE_SKIP_DEPTH);
+        return new ContextLogger(l.getCallerClassName(), l.getSimpleCallerClassName(), l.getStandardColor(), l.isDeep());
     }
 
     public static ContextLogger getLogger() {
-        return from(dev.lumas.core.util.ContextLogger.getLoggerInternal(null, false, BASE_SKIP_DEPTH + 1));
-    }
-
-    private static ContextLogger from(dev.lumas.core.util.ContextLogger logger) {
-        return new ContextLogger(
-                logger.getCallerClassName(),
-                logger.getSimpleCallerClassName(),
-                logger.getStandardColor(),
-                logger.isDeep()
-        );
+        var l = dev.lumas.core.util.ContextLogger.getLoggerInternal(null, false, BASE_SKIP_DEPTH);
+        return new ContextLogger(l.getCallerClassName(), l.getSimpleCallerClassName(), l.getStandardColor(), l.isDeep());
     }
 }
