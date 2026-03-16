@@ -1,83 +1,63 @@
 package dev.lumas.lumacore.utility;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextColor;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.command.CommandSender;
 
 import java.util.List;
-import java.util.stream.Stream;
 
+/**
+ * @deprecated Use {@link dev.lumas.core.util.Text}
+ */
+@Deprecated
 public class Text {
 
-    public static final Component PREFIX = mm("<b><#b986f9>Info</#b986f9></b> <dark_gray>»</dark_gray> ");
-
-    private static final String NORMAL_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    private static final String MONO_UPPER_ALPHABET = "ᴀʙᴄᴅᴇꜰɢʜɪᴊᴋʟᴍɴᴏᴘQʀꜱᴛᴜᴠᴡxʏᴢ";
+    public static final Component PREFIX = dev.lumas.core.util.Text.PREFIX;
 
     public static void msg(CommandSender sender, String m) {
-        sender.sendMessage(PREFIX.append(mm(m)).colorIfAbsent(TextColor.fromHexString("#E2E2E2")));
+        dev.lumas.core.util.Text.msg(sender, m);
     }
 
     public static void msg(CommandSender sender, Component m) {
-        sender.sendMessage(PREFIX.append(m));
+        dev.lumas.core.util.Text.msg(sender, m);
     }
 
     public static Component mm(String m) {
-        return MiniMessage.miniMessage().deserialize(m);
+        return dev.lumas.core.util.Text.mm(m);
     }
 
     public static Component mmNoItalic(String m) {
-        return MiniMessage.miniMessage().deserialize("<!i>" + m);
+        return dev.lumas.core.util.Text.mmNoItalic(m);
     }
 
     public static List<Component> mml(String m) {
-        return List.of(mm(m));
+        return dev.lumas.core.util.Text.mml(m);
     }
 
     public static List<Component> mml(Component... m) {
-        return List.of(m);
+        return dev.lumas.core.util.Text.mml(m);
     }
 
     public static List<Component> mmlNoItalic(String m) {
-        return List.of(mmNoItalic(m));
+        return dev.lumas.core.util.Text.mmlNoItalic(m);
     }
 
     public static List<Component> mml(List<String> m) {
-        return m.stream().map(Text::mm).toList();
+        return dev.lumas.core.util.Text.mml(m);
     }
 
     public static List<Component> mmlNoItalic(List<String> m) {
-        return m.stream().map(Text::mmNoItalic).toList();
+        return dev.lumas.core.util.Text.mmlNoItalic(m);
     }
 
     public static List<Component> mml(String... m) {
-        return Stream.of(m).map(Text::mm).toList();
+        return dev.lumas.core.util.Text.mml(m);
     }
 
     public static List<Component> mmlNoItalic(String... m) {
-        return Stream.of(m).map(Text::mmNoItalic).toList();
+        return dev.lumas.core.util.Text.mmlNoItalic(m);
     }
 
     public static String toMonoUpperText(String input) {
-        if (input == null) {
-            return null;
-        }
-        input = input.toUpperCase();
-
-        StringBuilder result = new StringBuilder();
-
-        for (char c : input.toCharArray()) {
-            int index = NORMAL_ALPHABET.indexOf(c);
-
-            if (index >= 0) {
-                result.append(MONO_UPPER_ALPHABET.charAt(index));
-            } else {
-                // If not a letter, just append the original character
-                result.append(c);
-            }
-        }
-
-        return result.toString();
+        return dev.lumas.core.util.Text.toMonoUpperText(input);
     }
 }

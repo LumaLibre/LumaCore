@@ -1,6 +1,6 @@
-package dev.lumas.lumacore.manager.guis.items;
+package dev.lumas.core.model.gui.items;
 
-import dev.lumas.lumacore.manager.guis.GuiItemAction;
+import dev.lumas.core.model.gui.GuiItemAction;
 import lombok.Getter;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;

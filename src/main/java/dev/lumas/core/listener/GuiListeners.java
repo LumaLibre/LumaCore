@@ -1,13 +1,11 @@
-package dev.lumas.lumacore.manager.guis;
+package dev.lumas.core.listener;
 
-import dev.lumas.lumacore.manager.modules.AutoRegister;
-import dev.lumas.lumacore.manager.modules.RegisterType;
+import dev.lumas.core.model.gui.AbstractGui;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 
-@AutoRegister(RegisterType.LISTENER)
 public class GuiListeners implements Listener {
 
     @EventHandler

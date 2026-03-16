@@ -1,58 +1,19 @@
 package dev.lumas.lumacore.manager.placeholder;
 
-import dev.lumas.lumacore.manager.commands.AbstractSubCommand;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-public abstract class AbstractPlaceholderManager<P extends JavaPlugin, T extends AbstractPlaceholder<P>> extends SoloAbstractPlaceholder {
-
-    protected Map<String, T> placeholders = new HashMap<>();
-    protected final P plugin;
+/**
+ * @deprecated Use {@link dev.lumas.core.model.placeholder.AbstractPlaceholderManager}
+ */
+@Deprecated
+public abstract class AbstractPlaceholderManager<P extends JavaPlugin, T extends AbstractPlaceholder<P>> extends dev.lumas.core.model.placeholder.AbstractPlaceholderManager<P, T> {
 
     protected AbstractPlaceholderManager(P plugin) {
-        super();
-        this.plugin = plugin;
+        super(plugin);
     }
 
     protected AbstractPlaceholderManager(P plugin, String identifier, String author, String version, boolean persist) {
-        super(identifier, author, version, persist);
-        this.plugin = plugin;
+        super(plugin, identifier, author, version, persist);
     }
 
-    @Nullable
-    public String unknownPlaceholderReturnValue(OfflinePlayer player) {
-        return null;
-    }
-
-    @Override
-    public @Nullable String onRequest(OfflinePlayer player, @NotNull String params) {
-        String[] paramsSplit = params.split("_");
-        if (paramsSplit.length == 0 || !placeholders.containsKey(paramsSplit[0])) {
-            return this.unknownPlaceholderReturnValue(player);
-        }
-
-        T placeholder = placeholders.get(paramsSplit[0]);
-        List<String> args = List.of(paramsSplit).subList(1, paramsSplit.length);
-        return placeholder.onRequest(plugin, player, args);
-    }
-
-    public void addPlaceholder(AbstractPlaceholder<?> abstractPlaceholder) {
-        placeholders.put(abstractPlaceholder.identifier(), (T) abstractPlaceholder);
-        for (String alias : abstractPlaceholder.info().aliases()) {
-            placeholders.put(alias, (T) abstractPlaceholder);
-        }
-    }
-
-    public void removePlaceholder(AbstractSubCommand<?> abstractPlaceholder) {
-        placeholders.remove(abstractPlaceholder.name());
-        for (String alias : abstractPlaceholder.info().aliases()) {
-            placeholders.remove(alias);
-        }
-    }
 }

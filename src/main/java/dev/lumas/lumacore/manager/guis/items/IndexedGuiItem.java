@@ -1,17 +1,16 @@
 package dev.lumas.lumacore.manager.guis.items;
 
 import dev.lumas.lumacore.manager.guis.GuiItemAction;
-import lombok.Getter;
 import org.bukkit.inventory.ItemStack;
 
-@Getter
-public non-sealed class IndexedGuiItem extends AbstractGuiItem {
-
-    protected int index;
+/**
+ * @deprecated Use {@link dev.lumas.core.model.gui.items.IndexedGuiItem}
+ */
+@Deprecated
+public class IndexedGuiItem extends dev.lumas.core.model.gui.items.IndexedGuiItem {
 
     public IndexedGuiItem(int index, ItemStack itemStack, GuiItemAction action) {
-        super(itemStack, action);
-        this.index = index;
+        super(index, itemStack, action);
     }
 
     public static IndexedGuiItem of(int index, ItemStack itemStack, GuiItemAction action) {
