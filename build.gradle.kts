@@ -1,36 +1,26 @@
 import org.apache.commons.io.output.ByteArrayOutputStream
-import org.apache.tools.ant.filters.ReplaceTokens
 import java.nio.charset.Charset
 
 plugins {
     id("java")
     id("maven-publish")
-    kotlin("jvm")
+    id("io.freefair.lombok") version "9.2.0"
     id("com.gradleup.shadow") version("8.3.5")
     id("de.eldoria.plugin-yml.bukkit") version("0.7.1")
+    kotlin("jvm")
 }
 
-group = "dev.lumas.lumacore"
-version = getGitCommitHashShort()
-
-val jdkVersion: Int = 21
-val charset: String = "UTF-8"
+group = "dev.lumas.core"
+version = commitHashShort()
 
 repositories {
-    mavenCentral()
     maven("https://repo.papermc.io/repository/maven-public/")
     maven("https://repo.extendedclip.com/content/repositories/placeholderapi/")
 }
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT")
-
     compileOnly("me.clip:placeholderapi:2.11.6")
-    // Lombok
-    compileOnly("org.projectlombok:lombok:1.18.30")
-    annotationProcessor("org.projectlombok:lombok:1.18.30")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:2.1.0")
-
 }
 
 tasks {
@@ -44,16 +34,8 @@ tasks {
         archiveVersion.set("")
         archiveClassifier.set("")
     }
-    processResources {
-        outputs.upToDateWhen { false }
-        filter<ReplaceTokens>(mapOf(
-            "tokens" to mapOf("version" to project.version.toString().replace("/", "")),
-            "beginToken" to "\${",
-            "endToken" to "}"
-        )).filteringCharset = charset
-    }
     withType<JavaCompile>().configureEach {
-        options.encoding = charset
+        options.encoding = "UTF-8"
     }
     jar {
         archiveVersion = null
@@ -61,12 +43,8 @@ tasks {
     }
 }
 
-kotlin {
-    jvmToolchain(jdkVersion)
-}
-
 java {
-    toolchain.languageVersion = JavaLanguageVersion.of(jdkVersion)
+    toolchain.languageVersion = JavaLanguageVersion.of(21)
     withSourcesJar()
 }
 
@@ -103,7 +81,7 @@ publishing {
 
 bukkit {
     name = "LumaCore"
-    main = "dev.lumas.lumacore.LumaCore"
+    main = "dev.lumas.core.LumaCore"
     version = project.version.toString()
     apiVersion = "1.21"
     author = "Jsinco"
@@ -112,7 +90,7 @@ bukkit {
 }
 
 
-fun getGitCommitHashShort(): String = ByteArrayOutputStream().use { stream ->
+fun commitHashShort(): String = ByteArrayOutputStream().use { stream ->
     var branch = "none"
     project.exec {
         commandLine = listOf("git", "log", "-1", "--format=%h")
