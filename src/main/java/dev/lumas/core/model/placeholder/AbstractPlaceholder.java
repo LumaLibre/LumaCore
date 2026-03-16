@@ -48,7 +48,7 @@ public interface AbstractPlaceholder<P extends JavaPlugin> {
      * @return the parent of this child placeholder
      */
     @NonNull
-    default Class<? extends AbstractPlaceholderManager<?, ?>> parent() {
+    default Class<? extends AbstractPlaceholderManager> parent() {
         return meta().parent();
     }
 

@@ -17,5 +17,5 @@ public interface PlaceholderAnnotation extends AnnotationHolder {
 
     String[] aliases();
 
-    Class<? extends AbstractPlaceholderManager<?, ?>> parent();
+    Class<? extends AbstractPlaceholderManager> parent();
 }

@@ -10,7 +10,6 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.Internal
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class GuiListeners implements Listener {
 
     @EventHandler

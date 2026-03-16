@@ -15,7 +15,7 @@ public interface CommandAnnotation extends AnnotationHolder {
 
     String[] aliases();
 
-    Class<? extends AbstractCommandManager<?, ?>> parent();
+    Class<? extends AbstractCommandManager> parent();
 
     boolean playerOnly();
 
