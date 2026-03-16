@@ -33,7 +33,7 @@ public enum Autowire {
     COMMAND(AbstractCommand.class),
     /**
      * Auto registration of classes extending
-     * {@link AbstractSubCommand}
+     * {@link AbstractSubCommand}.
      */
     SUBCOMMAND(AbstractSubCommand.class),
     /**

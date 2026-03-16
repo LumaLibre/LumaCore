@@ -1,6 +1,5 @@
-package dev.lumas.core.util.objects;
+package dev.lumas.core.util;
 
-import dev.lumas.core.util.Text;
 import lombok.Getter;
 import lombok.Setter;
 import net.kyori.adventure.text.Component;
@@ -15,7 +14,7 @@ import org.jspecify.annotations.Nullable;
 @NullMarked
 public class ContextLogger {
 
-    private static final int BASE_SKIP_DEPTH = 2;
+    protected static final int BASE_SKIP_DEPTH = 2;
     private static final StackWalker STACK_WALKER = StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE);
 
     private final String callerClassName;
@@ -115,7 +114,7 @@ public class ContextLogger {
         logThrowable(NamedTextColor.RED, msg, throwable);
     }
 
-    private static ContextLogger getLoggerInternal(@Nullable TextColor color, boolean deep, int skipFrames) {
+    protected static ContextLogger getLoggerInternal(@Nullable TextColor color, boolean deep, int skipFrames) {
         StackWalker.StackFrame frame = STACK_WALKER.walk(frames ->
                 frames.skip(skipFrames).findFirst()
         ).orElse(null);
