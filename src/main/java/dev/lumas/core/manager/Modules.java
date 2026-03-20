@@ -17,6 +17,7 @@ import org.bukkit.plugin.Plugin;
 import org.jspecify.annotations.NullMarked;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -91,10 +92,26 @@ public class Modules {
             if (!annotation.requires().isBlank() && !requiredExists(annotation.requires())) continue;
 
             try {
-                Constructor<?> constructor = aClass.getConstructor();
-                if (Modifier.isPrivate(constructor.getModifiers())) continue;
+                Object instance = null;
 
-                Object instance = constructor.newInstance();
+                // Check for Kotlin object singleton (static INSTANCE field)
+                try {
+                    Field instanceField = aClass.getDeclaredField("INSTANCE");
+                    if (Modifier.isStatic(instanceField.getModifiers()) && aClass.isAssignableFrom(instanceField.getType())) {
+                        instanceField.setAccessible(true);
+                        instance = instanceField.get(null);
+                    }
+                } catch (NoSuchFieldException ignored) {
+                    // Not a Kotlin object, fall through to constructor
+                }
+
+                // Fall back to no-args constructor
+                if (instance == null) {
+                    Constructor<?> constructor = aClass.getConstructor();
+                    if (Modifier.isPrivate(constructor.getModifiers())) continue;
+                    instance = constructor.newInstance();
+                }
+
                 modules.add(instance);
 
                 for (Autowire type : annotation.value()) {
@@ -111,7 +128,6 @@ public class Modules {
 
         Logging.log("Finished registering modules reflectively! (" + modules.size() + ")");
     }
-
     /**
      * Unregisters all registered modules using the appropriate handlers.
      * This should be called during plugin shutdown to ensure proper cleanup.
