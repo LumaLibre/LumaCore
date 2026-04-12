@@ -108,7 +108,9 @@ public class Modules {
                 // Fall back to no-args constructor
                 if (instance == null) {
                     Constructor<?> constructor = aClass.getDeclaredConstructor();
-                    //if (Modifier.isPrivate(constructor.getModifiers())) continue;
+                    if (Modifier.isPrivate(constructor.getModifiers())) {
+                        constructor.setAccessible(true);
+                    }
                     instance = constructor.newInstance();
                 }
 
