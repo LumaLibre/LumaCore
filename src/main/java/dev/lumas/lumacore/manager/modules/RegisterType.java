@@ -13,6 +13,8 @@ public enum RegisterType {
     PLACEHOLDER,
     SERVICE;
 
+    public static final RegisterType BOILERPLATE = SERVICE;
+
 
     public Autowire toNewHandle() {
         return Autowire.valueOf(name());
