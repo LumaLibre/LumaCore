@@ -1,6 +1,7 @@
 package dev.lumas.core.manager;
 
 import dev.lumas.core.annotation.Autowire;
+import dev.lumas.core.annotation.Provided;
 import dev.lumas.core.model.ModuleContext;
 import dev.lumas.core.model.internal.RegisterHandler;
 import dev.lumas.core.model.internal.handlers.CommandHandler;
@@ -15,6 +16,7 @@ import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -92,27 +94,8 @@ public class Modules {
             if (!annotation.requires().isBlank() && !requiredExists(annotation.requires())) continue;
 
             try {
-                Object instance = null;
-
-                // Check for Kotlin object singleton (static INSTANCE field)
-                try {
-                    Field instanceField = aClass.getDeclaredField("INSTANCE");
-                    if (Modifier.isStatic(instanceField.getModifiers()) && aClass.isAssignableFrom(instanceField.getType())) {
-                        instanceField.setAccessible(true);
-                        instance = instanceField.get(null);
-                    }
-                } catch (NoSuchFieldException ignored) {
-                    // Not a Kotlin object, fall through to constructor
-                }
-
-                // Fall back to no-args constructor
-                if (instance == null) {
-                    Constructor<?> constructor = aClass.getDeclaredConstructor();
-                    if (Modifier.isPrivate(constructor.getModifiers())) {
-                        constructor.setAccessible(true);
-                    }
-                    instance = constructor.newInstance();
-                }
+                Object instance = resolveInstance(aClass);
+                if (instance == null) continue;
 
                 modules.add(instance);
 
@@ -166,5 +149,63 @@ public class Modules {
 
     private boolean requiredExists(String string) {
         return Bukkit.getPluginManager().getPlugin(string) != null || Reflect.classExists(string);
+    }
+
+    /**
+     * Resolves an instance for the given class.
+     * <p>
+     * Resolution order:
+     * <ol>
+     *   <li>If the class is annotated with {@link Provided}, read the static field named
+     *       by {@link Provided#value()} (default {@code "INSTANCE"}).</li>
+     *   <li>Otherwise, if the class is a Kotlin {@code object} (has a static {@code INSTANCE}
+     *       field of its own type), use that field.</li>
+     *   <li>Otherwise, invoke the no-args constructor.</li>
+     * </ol>
+     *
+     * @param aClass the class to resolve an instance for
+     * @return the resolved instance, or {@code null} if a declared singleton field was unusable
+     * @throws ReflectiveOperationException if constructor invocation fails
+     */
+    private @Nullable Object resolveInstance(Class<?> aClass) throws ReflectiveOperationException {
+        Provided provided = Annotations.getProvidedAnnotation(aClass);
+        if (provided != null) {
+            Object instance = readStaticField(aClass, provided.value());
+            if (instance == null) {
+                Logging.warningLog("@Singleton class " + aClass.getCanonicalName() + " has no usable static field '" + provided.value() + "'");
+            }
+            return instance;
+        }
+
+        Object kotlinObject = readStaticField(aClass, "INSTANCE");
+        if (kotlinObject != null) {
+            return kotlinObject;
+        }
+
+        Constructor<?> constructor = aClass.getDeclaredConstructor();
+        if (Modifier.isPrivate(constructor.getModifiers())) {
+            constructor.setAccessible(true);
+        }
+        return constructor.newInstance();
+    }
+
+    /**
+     * Attempts to read a static field of the given name whose type is assignable to the declaring class.
+     * Returns null if the field doesn't exist, isn't static, or is of an incompatible type.
+     */
+    private @Nullable Object readStaticField(Class<?> aClass, String fieldName) {
+        try {
+            Field field = aClass.getDeclaredField(fieldName);
+            if (!Modifier.isStatic(field.getModifiers()) || !aClass.isAssignableFrom(field.getType()))  {
+                return null;
+            }
+            field.setAccessible(true);
+            return field.get(null);
+        } catch (NoSuchFieldException e) {
+            return null;
+        } catch (IllegalAccessException e) {
+            Logging.warningLog("Could not access field '" + fieldName + "' on " + aClass.getCanonicalName());
+            return null;
+        }
     }
 }

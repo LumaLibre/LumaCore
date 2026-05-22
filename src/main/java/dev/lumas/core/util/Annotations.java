@@ -3,6 +3,7 @@ package dev.lumas.core.util;
 import dev.lumas.core.annotation.CommandMeta;
 import dev.lumas.core.annotation.PlaceholderMeta;
 import dev.lumas.core.annotation.Register;
+import dev.lumas.core.annotation.Provided;
 import dev.lumas.core.model.internal.command.CommandAnnotation;
 import dev.lumas.core.model.internal.command.CommandInfoHolder;
 import dev.lumas.core.model.internal.command.CommandMetaHolder;
@@ -79,5 +80,10 @@ public final class Annotations {
             return new AutoRegisterAnnotation(autoRegister);
         }
         return null;
+    }
+
+    @Nullable
+    public static Provided getProvidedAnnotation(Class<?> clazz) {
+        return clazz.getAnnotation(Provided.class);
     }
 }
