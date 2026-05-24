@@ -10,6 +10,8 @@ public class LumaCore extends JavaPlugin {
     private static LumaCore instance;
     @Getter
     private static boolean withPlaceholderAPI;
+    @Getter
+    private static boolean stopping;
 
     @Override
     public void onLoad() {
@@ -26,6 +28,6 @@ public class LumaCore extends JavaPlugin {
 
     @Override
     public void onDisable() {
-
+        stopping = true;
     }
 }
