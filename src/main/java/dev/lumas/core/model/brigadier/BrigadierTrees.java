@@ -7,8 +7,12 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.suggestion.SuggestionProvider;
+import com.mojang.brigadier.suggestion.Suggestions;
+import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import dev.lumas.core.annotation.Argument;
 import dev.lumas.core.annotation.BrigadierExecutor;
+import dev.lumas.core.annotation.Suggests;
 import dev.lumas.core.model.MetaHolder;
 import dev.lumas.core.util.Logging;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
@@ -24,18 +28,21 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Internal helpers for synthesizing a Brigadier tree from the
  * {@link BrigadierExecutor}/{@link Argument} annotation pair. Works for both
- * top-level {@link BrigadierCommand}s and {@link BrigadierSubCommand}s  anything
+ * top-level {@link BrigadierCommand}s and {@link BrigadierSubCommand}s — anything
  * exposing a {@link MetaHolder#meta()}.
  * <p>
- * Supports linear chains with optional suffix arguments. An optional argument
- * attaches an executor to the preceding node, letting the user stop the command
- * there; the executor method is then invoked with {@code null} for any omitted
- * optional argument.
+ * Supports linear chains with optional suffix arguments, plus per-argument
+ * tab-completion suppliers via {@link Suggests @Suggests} methods on the same class.
  */
 @NullMarked
 @SuppressWarnings("UnstableApiUsage")
@@ -86,24 +93,34 @@ final class BrigadierTrees {
             executor.setAccessible(true);
         }
 
+        // Find @Suggests methods, indexed by the argument name they target.
+        Map<String, Method> suggesters = collectSuggesters(holder, params);
+
         String literal = holder.meta().name();
 
-        // No args  the literal itself is the executor.
+        // No args — the literal itself is the executor.
         if (params.length == 1) {
             return Commands.literal(literal).executes(invocation(holder, executor, params, 0));
         }
 
-        // Build argument nodes in declaration order.
+        // Build argument nodes in declaration order, applying .suggests() where defined.
         List<RequiredArgumentBuilder<CommandSourceStack, ?>> nodes = new ArrayList<>(params.length - 1);
         for (int i = 1; i < params.length; i++) {
             Argument arg = params[i].getAnnotation(Argument.class);
             ArgumentType<?> type = resolveArgumentType(arg, params[i]);
-            nodes.add(Commands.argument(arg.value(), type));
+            RequiredArgumentBuilder<CommandSourceStack, ?> node = Commands.argument(arg.value(), type);
+
+            Method suggester = suggesters.get(arg.value());
+            if (suggester != null) {
+                node.suggests(makeSuggestionProvider(holder, suggester));
+            }
+
+            nodes.add(node);
         }
 
         LiteralArgumentBuilder<CommandSourceStack> root = Commands.literal(literal);
 
-        // The literal itself is also a stop point if the first argument is optional 
+        // The literal itself is also a stop point if the first argument is optional —
         // i.e. the command can be invoked with zero arguments supplied.
         if (params[1].getAnnotation(Argument.class).optional()) {
             root.executes(invocation(holder, executor, params, 0));
@@ -148,7 +165,7 @@ final class BrigadierTrees {
                     throw new IllegalStateException(
                             "Optional @Argument(\"" + arg.value() + "\") on " + executor +
                                     " uses primitive type " + params[i].getType().getName() +
-                                    "  use the boxed type (e.g. Double, Integer) so null can be passed when omitted"
+                                    " — use the boxed type (e.g. Double, Integer) so null can be passed when omitted"
                     );
                 }
                 seenOptional = true;
@@ -159,6 +176,103 @@ final class BrigadierTrees {
                 );
             }
         }
+    }
+
+    /**
+     * Find all {@link Suggests @Suggests}-annotated methods on the holder, indexed
+     * by argument name. Validates each one:
+     * <ul>
+     *     <li>References an actual {@code @Argument} on the executor</li>
+     *     <li>Has the expected signature {@code (CommandContext<CommandSourceStack>, SuggestionsBuilder) → CompletableFuture<Suggestions>}</li>
+     *     <li>No two @Suggests methods target the same argument</li>
+     * </ul>
+     */
+    private static Map<String, Method> collectSuggesters(MetaHolder holder, Parameter[] params) {
+        // Build the set of valid argument names from the executor signature.
+        Set<String> validArgNames = new HashSet<>();
+        for (int i = 1; i < params.length; i++) {
+            validArgNames.add(params[i].getAnnotation(Argument.class).value());
+        }
+
+        Map<String, Method> result = new HashMap<>();
+        for (Method method : holder.getClass().getDeclaredMethods()) {
+            Suggests annotation = method.getAnnotation(Suggests.class);
+            if (annotation == null) {
+                continue;
+            }
+
+            String argName = annotation.value();
+
+            if (!validArgNames.contains(argName)) {
+                throw new IllegalStateException(
+                        "@Suggests(\"" + argName + "\") on " + method +
+                                " does not match any @Argument on the executor of " +
+                                holder.getClass().getName() +
+                                ". Valid names: " + validArgNames
+                );
+            }
+
+            if (result.containsKey(argName)) {
+                throw new IllegalStateException(
+                        "Multiple @Suggests(\"" + argName + "\") methods on " +
+                                holder.getClass().getName() + "; only one is allowed per argument"
+                );
+            }
+
+            validateSuggesterSignature(method);
+
+            if (!method.canAccess(holder)) {
+                method.setAccessible(true);
+            }
+            result.put(argName, method);
+        }
+        return result;
+    }
+
+    private static void validateSuggesterSignature(Method method) {
+        Class<?>[] paramTypes = method.getParameterTypes();
+        if (paramTypes.length != 2
+                || !CommandContext.class.isAssignableFrom(paramTypes[0])
+                || !SuggestionsBuilder.class.isAssignableFrom(paramTypes[1])) {
+            throw new IllegalStateException(
+                    "@Suggests method " + method +
+                            " must have signature (CommandContext<CommandSourceStack>, SuggestionsBuilder)"
+            );
+        }
+        if (!CompletableFuture.class.isAssignableFrom(method.getReturnType())) {
+            throw new IllegalStateException(
+                    "@Suggests method " + method +
+                            " must return CompletableFuture<Suggestions>"
+            );
+        }
+    }
+
+    /**
+     * Wrap a {@link Suggests @Suggests}-annotated method as a Brigadier
+     * {@link SuggestionProvider}.
+     */
+    @SuppressWarnings("unchecked")
+    private static SuggestionProvider<CommandSourceStack> makeSuggestionProvider(
+            MetaHolder holder,
+            Method suggester
+    ) {
+        return (ctx, builder) -> {
+            try {
+                Object result = suggester.invoke(holder, ctx, builder);
+                if (result instanceof CompletableFuture<?> future) {
+                    return (CompletableFuture<Suggestions>) future;
+                }
+                Logging.warningLog(
+                        "@Suggests method " + suggester + " returned non-CompletableFuture: " +
+                                (result == null ? "null" : result.getClass().getName())
+                );
+                return builder.buildFuture();
+            } catch (Exception e) {
+                Throwable cause = e.getCause() != null ? e.getCause() : e;
+                Logging.errorLog("@Suggests method " + suggester + " threw", cause);
+                return builder.buildFuture();
+            }
+        };
     }
 
     /**
@@ -173,7 +287,7 @@ final class BrigadierTrees {
     ) {
         return ctx -> {
             try {
-                @org.jetbrains.annotations.Nullable Object[] callArgs = new Object[params.length];
+                Object[] callArgs = new Object[params.length];
                 callArgs[0] = ctx.getSource();
                 for (int i = 1; i < params.length; i++) {
                     if (i <= depth) {
@@ -199,15 +313,6 @@ final class BrigadierTrees {
     /**
      * Pull an argument out of the {@link CommandContext}, bridging Paper resolver
      * types to their declared Bukkit equivalents.
-     * <p>
-     * Currently bridges:
-     * <ul>
-     *     <li>{@link PlayerSelectorArgumentResolver} → {@link Player} (first match,
-     *         or {@code null} if the selector matched nothing)</li>
-     *     <li>{@link EntitySelectorArgumentResolver} → {@link Entity} (first match,
-     *         or {@code null} if the selector matched nothing)</li>
-     * </ul>
-     * Other types pass through with a direct {@code ctx.getArgument(name, paramType)}.
      */
     private static @Nullable Object resolveArgument(
             CommandContext<CommandSourceStack> ctx,
@@ -252,7 +357,7 @@ final class BrigadierTrees {
             throw new IllegalStateException(
                     "Could not infer ArgumentType for parameter '" + arg.value() +
                             "' of type " + parameter.getType().getName() +
-                            "  specify @Argument(type=...) or @Argument(provider=...)"
+                            " — specify @Argument(type=...) or @Argument(provider=...)"
             );
         }
         return inferred;
@@ -277,7 +382,7 @@ final class BrigadierTrees {
         } catch (ReflectiveOperationException e) {
             throw new IllegalStateException(
                     "Failed to instantiate ArgumentType " + typeClass.getName() +
-                            " - provide a public no-args constructor or a public static INSTANCE field, " +
+                            ", provide a public no-args constructor or a public static INSTANCE field, " +
                             "or use @Argument(provider=...) instead",
                     e
             );
