@@ -28,6 +28,7 @@ public record CommandMetaHolder(CommandMeta handle) implements CommandAnnotation
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public Class<? extends AbstractCommandManager> parent() {
         return (Class<? extends AbstractCommandManager>) handle.parent();
     }

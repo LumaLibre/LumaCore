@@ -7,7 +7,7 @@ plugins {
     id("com.gradleup.shadow") version("8.3.5")
     id("de.eldoria.plugin-yml.bukkit") version("0.7.1")
     id("io.papermc.paperweight.userdev") version "2.0.0-beta.21"
-    kotlin("jvm")
+    kotlin("jvm") version "2.3.21"
 }
 
 group = "dev.lumas.core"
