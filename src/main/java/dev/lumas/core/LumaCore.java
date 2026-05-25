@@ -3,8 +3,10 @@ package dev.lumas.core;
 import dev.lumas.core.listener.GuiListeners;
 import lombok.Getter;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.ApiStatus;
 
-public class LumaCore extends JavaPlugin {
+@ApiStatus.Internal
+public final class LumaCore extends JavaPlugin {
 
     @Getter
     private static LumaCore instance;

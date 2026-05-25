@@ -1,5 +1,6 @@
 package dev.lumas.core.model;
 
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.ApiStatus;
 import org.jspecify.annotations.NullMarked;
@@ -22,5 +23,23 @@ public record ModuleContext(Plugin plugin, String fallbackPrefix) {
 
     public static ModuleContext of(Plugin plugin, String fallbackPrefix) {
         return new ModuleContext(plugin, fallbackPrefix);
+    }
+
+    public enum LoadType {
+        STARTUP,
+        RELOAD;
+
+        public boolean isStartup() {
+            return this == STARTUP;
+        }
+
+        public boolean isReload() {
+            return this == RELOAD;
+        }
+
+        // Good enough for what we need
+        public static LoadType determine() {
+            return Bukkit.getOnlinePlayers().isEmpty() ? STARTUP : RELOAD;
+        }
     }
 }

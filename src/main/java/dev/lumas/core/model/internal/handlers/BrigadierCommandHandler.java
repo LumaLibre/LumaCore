@@ -9,8 +9,14 @@ import dev.lumas.core.model.internal.RegisterHandler;
 import dev.lumas.core.util.Logging;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
+import io.papermc.paper.command.brigadier.PaperBrigadier;
+import io.papermc.paper.command.brigadier.PaperCommands;
 import io.papermc.paper.plugin.lifecycle.event.LifecycleEventManager;
+import io.papermc.paper.plugin.lifecycle.event.LifecycleEventRunner;
+import io.papermc.paper.plugin.lifecycle.event.registrar.ReloadableRegistrarEvent;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
+import org.bukkit.Bukkit;
+import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jspecify.annotations.NullMarked;
@@ -59,6 +65,17 @@ public class BrigadierCommandHandler implements RegisterHandler<Object> {
             managers.add(manager);
         }
         ensureLifecycleRegistered(ctx);
+
+        if (ModuleContext.LoadType.determine().isReload()) {
+            try {
+                Bukkit.getGlobalRegionScheduler().runDelayed(ctx.plugin(), task -> {
+                    refreshCommandTree();
+                    Logging.log("Finished reloading command tree (ctx: " + ctx.plugin().getName() + ").");
+                }, 30);
+            } catch (Throwable t) {
+                Logging.errorLog("Failed to schedule command tree refresh (plugin disabled?)", t);
+            }
+        }
     }
 
     @Override
@@ -74,8 +91,21 @@ public class BrigadierCommandHandler implements RegisterHandler<Object> {
         if (command instanceof BrigadierCommandManager<?> manager) {
             managers.remove(manager);
         }
-        // Paper doesn't expose runtime command removal off the COMMANDS event.
-        // The plugin should be reloaded for unregistrations to take effect.
+
+        // Remove this specific command's nodes from the live dispatcher.
+        try {
+            var root = PaperCommands.INSTANCE.getDispatcherInternal().getRoot();
+            String namespace = ctx.plugin().getPluginMeta().getName().toLowerCase();
+            String name = command.meta().name();
+            root.removeCommand(name);
+            root.removeCommand(namespace + ":" + name);
+            for (String alias : command.meta().aliases()) {
+                root.removeCommand(alias);
+                root.removeCommand(namespace + ":" + alias);
+            }
+        } catch (Throwable t) {
+            Logging.errorLog("Could not remove " + command.meta().name() + " from dispatcher", t);
+        }
     }
 
     @Override
@@ -85,10 +115,6 @@ public class BrigadierCommandHandler implements RegisterHandler<Object> {
         subHandler.postProcess(context);
     }
 
-    /**
-     * Expose registered managers so {@link BrigadierSubCommandHandler} can resolve
-     * subcommand parents without duplicating bookkeeping.
-     */
     public List<BrigadierCommandManager<?>> managers() {
         return managers;
     }
@@ -118,5 +144,46 @@ public class BrigadierCommandHandler implements RegisterHandler<Object> {
             }
         });
         lifecycleRegistered = true;
+    }
+
+    private void refreshCommandTree() {
+        try {
+            net.minecraft.server.MinecraftServer server = ((CraftServer) Bukkit.getServer()).getServer();
+            net.minecraft.server.ReloadableServerResources resources = server.resources.managers();
+            net.minecraft.commands.Commands oldCommands = resources.getCommands();
+
+            // build fresh new contexts
+            net.minecraft.commands.CommandBuildContext buildContext = net.minecraft.commands.CommandBuildContext.simple(
+                    server.registryAccess(),
+                    server.getWorldData().enabledFeatures()
+            );
+            net.minecraft.commands.Commands.CommandSelection selection = server.isDedicatedServer()
+                    ? net.minecraft.commands.Commands.CommandSelection.DEDICATED
+                    : net.minecraft.commands.Commands.CommandSelection.INTEGRATED;
+            net.minecraft.commands.Commands freshCommands = new net.minecraft.commands.Commands(selection, buildContext, true);
+
+            PaperCommands.INSTANCE.setDispatcher(freshCommands, buildContext);
+            io.papermc.paper.command.PaperCommands.registerCommands();
+            PaperBrigadier.moveBukkitCommands(oldCommands, freshCommands);
+            resources.commands = freshCommands;
+
+            PaperCommands.INSTANCE.setValid();
+            LifecycleEventRunner.INSTANCE.callReloadableRegistrarEvent(
+                    LifecycleEvents.COMMANDS,
+                    PaperCommands.INSTANCE,
+                    Plugin.class,
+                    ReloadableRegistrarEvent.Cause.RELOAD
+            );
+
+
+
+            for (net.minecraft.server.level.ServerPlayer player : server.getPlayerList().getPlayers()) {
+                if (server.getPlayerList().isOp(player.nameAndId())) {
+                    freshCommands.sendCommands(player);
+                }
+            }
+        } catch (Throwable t) {
+            Logging.errorLog("Failed to refresh command tree", t);
+        }
     }
 }
