@@ -1,5 +1,6 @@
 package dev.lumas.core.model.command;
 
+import dev.lumas.core.model.MetaHolder;
 import dev.lumas.core.model.internal.command.CommandAnnotation;
 import dev.lumas.core.util.Annotations;
 import org.bukkit.command.CommandSender;
@@ -9,7 +10,7 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 
-public interface AbstractSubCommand<P extends JavaPlugin> {
+public interface AbstractSubCommand<P extends JavaPlugin> extends MetaHolder {
 
     boolean execute(@NonNull P plugin, @NonNull CommandSender sender, @NonNull String label, @NonNull String @NonNull[] args);
 
@@ -50,6 +51,7 @@ public interface AbstractSubCommand<P extends JavaPlugin> {
     }
 
     @NonNull
+    @Override
     default CommandAnnotation meta() {
         CommandAnnotation meta = Annotations.getCommandMeta(this);
         if (meta == null) {

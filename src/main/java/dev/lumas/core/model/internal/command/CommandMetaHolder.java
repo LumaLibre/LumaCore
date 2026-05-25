@@ -29,7 +29,7 @@ public record CommandMetaHolder(CommandMeta handle) implements CommandAnnotation
 
     @Override
     public Class<? extends AbstractCommandManager> parent() {
-        return handle.parent();
+        return (Class<? extends AbstractCommandManager>) handle.parent();
     }
 
     @Override

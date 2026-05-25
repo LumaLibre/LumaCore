@@ -3,6 +3,7 @@ package dev.lumas.core.annotation;
 import dev.lumas.core.model.command.AbstractCommand;
 import dev.lumas.core.model.command.AbstractCommandManager;
 import dev.lumas.core.model.command.AbstractSubCommand;
+import dev.lumas.core.model.command.BaseCommandManager;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -45,7 +46,7 @@ public @interface CommandMeta {
      * The parent class of this command, if it's a subcommand
      * @return the parent class of this command
      */
-    Class<? extends AbstractCommandManager> parent() default AbstractCommandManager.class;
+    Class<? extends BaseCommandManager> parent() default BaseCommandManager.class;
 
     /**
      * Whether the command can only be executed by players

@@ -3,6 +3,8 @@ package dev.lumas.core.annotation;
 import dev.lumas.core.model.Service;
 import dev.lumas.core.model.command.AbstractCommand;
 import dev.lumas.core.model.command.AbstractSubCommand;
+import dev.lumas.core.model.internal.handlers.BrigadierCommandHandler;
+import dev.lumas.core.model.internal.handlers.BrigadierSubCommandHandler;
 import dev.lumas.core.model.placeholder.AbstractPlaceholder;
 import dev.lumas.core.model.placeholder.SoloAbstractPlaceholder;
 import org.bukkit.event.Listener;
@@ -41,16 +43,18 @@ public enum Autowire {
      * {@link SoloAbstractPlaceholder}
      * or {@link AbstractPlaceholder}.
      */
-    PLACEHOLDER(() -> resolveClasses(
-            "dev.lumas.core.model.placeholder.SoloAbstractPlaceholder",
-            "dev.lumas.core.model.placeholder.AbstractPlaceholder"
-    )),
+    PLACEHOLDER(() -> resolveClasses("dev.lumas.core.model.placeholder.SoloAbstractPlaceholder", "dev.lumas.core.model.placeholder.AbstractPlaceholder")),
     /**
      * Auto calling of {@link Service#register()}
      * and {@link Service#unregister()} methods of
      * classes implementing {@link Service}.
      */
-    SERVICE(Service.class);
+    SERVICE(Service.class),
+    /**
+     * Auto registration of classes implementing {@link BrigadierCommandHandler}
+     * and {@link BrigadierSubCommandHandler}.
+     */
+    BRIGADIER(BrigadierCommandHandler.class, BrigadierSubCommandHandler.class);
 
     private Class<?> @Nullable [] handleTypes;
     private @Nullable Supplier<Class<?>[]> supplier;

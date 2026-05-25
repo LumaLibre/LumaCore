@@ -4,6 +4,8 @@ import dev.lumas.core.annotation.Autowire;
 import dev.lumas.core.annotation.Provided;
 import dev.lumas.core.model.ModuleContext;
 import dev.lumas.core.model.internal.RegisterHandler;
+import dev.lumas.core.model.internal.handlers.BrigadierCommandHandler;
+import dev.lumas.core.model.internal.handlers.BrigadierSubCommandHandler;
 import dev.lumas.core.model.internal.handlers.CommandHandler;
 import dev.lumas.core.model.internal.handlers.ListenerHandler;
 import dev.lumas.core.model.internal.handlers.PlaceholderHandler;
@@ -58,6 +60,7 @@ public class Modules {
         addHandler(Autowire.SUBCOMMAND, new SubCommandHandler(commandHandler));
         addHandler(Autowire.PLACEHOLDER, new PlaceholderHandler());
         addHandler(Autowire.SERVICE, new ServiceHandler());
+        addHandler(Autowire.BRIGADIER, new BrigadierCommandHandler());
     }
 
     /**

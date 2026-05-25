@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public abstract class AbstractCommandManager<P extends JavaPlugin, T extends AbstractSubCommand<P>> extends AbstractCommand implements DelegateHolder<T> {
+public abstract class AbstractCommandManager<P extends JavaPlugin, T extends AbstractSubCommand<P>> extends AbstractCommand implements DelegateHolder<T>, BaseCommandManager {
 
     protected final Map<String, T> subCommands = new HashMap<>();
     protected final P plugin;

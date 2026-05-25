@@ -1,6 +1,7 @@
 package dev.lumas.core.model.command;
 
 import com.google.common.collect.ImmutableList;
+import dev.lumas.core.model.MetaHolder;
 import dev.lumas.core.model.internal.command.CommandAnnotation;
 import dev.lumas.core.util.Annotations;
 import dev.lumas.core.util.Text;
@@ -21,7 +22,7 @@ import dev.lumas.core.annotation.CommandMeta;
  * with support for the {@link CommandMeta} annotation.
  */
 @NullMarked
-public abstract class AbstractCommand extends BukkitCommand {
+public abstract class AbstractCommand extends BukkitCommand implements MetaHolder {
 
     // JDK 21 requires args be passed in when calling super(). This string is transient.
     private static final String HOLDER = "holder";
@@ -50,10 +51,7 @@ public abstract class AbstractCommand extends BukkitCommand {
     protected AbstractCommand() {
         super(HOLDER, HOLDER, HOLDER, List.of());
 
-        CommandAnnotation info = Annotations.getCommandMeta(this);
-        if (info == null) {
-            throw new IllegalStateException("@CommandMeta annotation not found on " + getClass().getName());
-        }
+        CommandAnnotation info = meta();
         this.setName(info.name());
         this.setLabel(info.name());
         this.setDescription(info.description());
@@ -119,6 +117,15 @@ public abstract class AbstractCommand extends BukkitCommand {
         } else {
             return ImmutableList.of();
         }
+    }
+
+    @Override
+    public CommandAnnotation meta() {
+        CommandAnnotation info = Annotations.getCommandMeta(this);
+        if (info == null) {
+            throw new IllegalStateException("@CommandMeta annotation not found on " + getClass().getName());
+        }
+        return info;
     }
 
     /**

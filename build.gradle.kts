@@ -1,4 +1,3 @@
-import org.apache.commons.io.output.ByteArrayOutputStream
 import java.nio.charset.Charset
 
 plugins {
@@ -8,6 +7,8 @@ plugins {
     id("com.gradleup.shadow") version("8.3.5")
     id("de.eldoria.plugin-yml.bukkit") version("0.7.1")
     kotlin("jvm")
+    id("xyz.jpenilla.run-paper") version "3.0.1"
+    //id("io.papermc.paperweight.userdev") version "2.0.0-beta.21"
 }
 
 group = "dev.lumas.core"
@@ -21,6 +22,7 @@ repositories {
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT")
     compileOnly("me.clip:placeholderapi:2.11.6")
+    //paperweight.paperDevBundle("26.1.2.build.+")
 }
 
 tasks {
@@ -41,10 +43,14 @@ tasks {
         archiveVersion = null
         enabled = false
     }
+
+    runServer {
+        minecraftVersion("26.1.2")
+    }
 }
 
 java {
-    toolchain.languageVersion = JavaLanguageVersion.of(21)
+    toolchain.languageVersion = JavaLanguageVersion.of(25)
     withSourcesJar()
 }
 
@@ -90,12 +96,16 @@ bukkit {
 }
 
 
-fun commitHashShort(): String = ByteArrayOutputStream().use { stream ->
-    var branch = "none"
-    project.exec {
-        commandLine = listOf("git", "log", "-1", "--format=%h")
-        standardOutput = stream
-    }
-    if (stream.size() > 0) branch = stream.toString(Charset.defaultCharset().name()).trim()
-    return branch
+fun commitHashShort(): String = try {
+    ProcessBuilder("git", "rev-parse", "--short", "HEAD")
+        .redirectErrorStream(true)
+        .start()
+        .inputStream
+        .bufferedReader(Charset.defaultCharset())
+        .readText()
+        .trim()
+        .ifBlank { "none" }
+} catch (e: Exception) {
+    e.printStackTrace()
+    "none"
 }
