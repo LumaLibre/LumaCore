@@ -17,7 +17,7 @@ import java.util.List;
  * (declared via {@code @CommandMeta(parent = ...)}).
  * <p>
  * Throws if a subcommand's parent class resolves to a Bukkit
- * {@link AbstractCommandManager} — Brigadier subcommands cannot attach to Bukkit
+ * {@link AbstractCommandManager} - Brigadier subcommands cannot attach to Bukkit
  * managers because their tree-building contract is incompatible.
  * <p>
  * Not registered against an {@code Autowire} value directly. Owned by
@@ -41,7 +41,7 @@ public class BrigadierSubCommandHandler implements RegisterHandler<BrigadierSubC
 
     @Override
     public void unregister(BrigadierSubCommand instance, ModuleContext context) {
-        // nothing to do — handled at the parent command level
+        // nothing to do - handled at the parent command level
     }
 
     @Override

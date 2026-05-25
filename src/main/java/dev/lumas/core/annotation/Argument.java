@@ -37,8 +37,8 @@ import java.lang.annotation.Target;
  * Constraints (enforced at registration time):
  * <ul>
  *     <li>Once any argument is optional, every following argument must also be
- *         optional — Brigadier has no notion of "middle-optional" arguments.</li>
- *     <li>An optional parameter must accept {@code null} — i.e. it must not be a
+ *         optional - Brigadier has no notion of "middle-optional" arguments.</li>
+ *     <li>An optional parameter must accept {@code null} - i.e. it must not be a
  *         primitive type. Use boxed types ({@code Double}, {@code Integer}, ...)
  *         or reference types ({@code Player}, {@code String}, ...).</li>
  * </ul>

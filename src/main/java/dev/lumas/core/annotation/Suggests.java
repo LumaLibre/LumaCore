@@ -16,7 +16,7 @@ import java.lang.annotation.Target;
  * CompletableFuture<Suggestions> name(CommandContext<CommandSourceStack> ctx,
  *                                     SuggestionsBuilder builder)
  * }</pre>
- * — i.e. Brigadier's {@link com.mojang.brigadier.suggestion.SuggestionProvider}
+ * - i.e. Brigadier's {@link com.mojang.brigadier.suggestion.SuggestionProvider}
  * shape, but as a method on your command class.
  * <p>
  * The {@link #value()} must match an {@code @Argument(value=...)} on the same
@@ -48,7 +48,7 @@ import java.lang.annotation.Target;
 public @interface Suggests {
 
     /**
-     * The argument name this suggestion supplier is bound to — must match an
+     * The argument name this suggestion supplier is bound to - must match an
      * {@link Argument#value()} on the executor method.
      */
     String value();

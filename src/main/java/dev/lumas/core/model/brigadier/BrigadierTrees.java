@@ -38,7 +38,7 @@ import java.util.concurrent.CompletableFuture;
 /**
  * Internal helpers for synthesizing a Brigadier tree from the
  * {@link BrigadierExecutor}/{@link Argument} annotation pair. Works for both
- * top-level {@link BrigadierCommand}s and {@link BrigadierSubCommand}s — anything
+ * top-level {@link BrigadierCommand}s and {@link BrigadierSubCommand}s anything
  * exposing a {@link MetaHolder#meta()}.
  * <p>
  * Supports linear chains with optional suffix arguments, plus per-argument
@@ -92,18 +92,15 @@ final class BrigadierTrees {
         if (!executor.canAccess(holder)) {
             executor.setAccessible(true);
         }
-
-        // Find @Suggests methods, indexed by the argument name they target.
+        
         Map<String, Method> suggesters = collectSuggesters(holder, params);
 
         String literal = holder.meta().name();
-
-        // No args — the literal itself is the executor.
+        
         if (params.length == 1) {
             return Commands.literal(literal).executes(invocation(holder, executor, params, 0));
         }
-
-        // Build argument nodes in declaration order, applying .suggests() where defined.
+        
         List<RequiredArgumentBuilder<CommandSourceStack, ?>> nodes = new ArrayList<>(params.length - 1);
         for (int i = 1; i < params.length; i++) {
             Argument arg = params[i].getAnnotation(Argument.class);
@@ -120,7 +117,7 @@ final class BrigadierTrees {
 
         LiteralArgumentBuilder<CommandSourceStack> root = Commands.literal(literal);
 
-        // The literal itself is also a stop point if the first argument is optional —
+        // The literal itself is also a stop point if the first argument is optional -
         // i.e. the command can be invoked with zero arguments supplied.
         if (params[1].getAnnotation(Argument.class).optional()) {
             root.executes(invocation(holder, executor, params, 0));
@@ -165,7 +162,7 @@ final class BrigadierTrees {
                     throw new IllegalStateException(
                             "Optional @Argument(\"" + arg.value() + "\") on " + executor +
                                     " uses primitive type " + params[i].getType().getName() +
-                                    " — use the boxed type (e.g. Double, Integer) so null can be passed when omitted"
+                                    " - use the boxed type (e.g. Double, Integer) so null can be passed when omitted"
                     );
                 }
                 seenOptional = true;
@@ -287,12 +284,13 @@ final class BrigadierTrees {
     ) {
         return ctx -> {
             try {
+                @org.jetbrains.annotations.Nullable
                 Object[] callArgs = new Object[params.length];
                 callArgs[0] = ctx.getSource();
                 for (int i = 1; i < params.length; i++) {
                     if (i <= depth) {
                         Argument arg = params[i].getAnnotation(Argument.class);
-                        callArgs[i] = resolveArgument(ctx, arg.value(), params[i].getType());
+                        callArgs[i] = resolveArgument(ctx, arg.value(), params[i]);
                     } else {
                         callArgs[i] = null;
                     }
@@ -312,13 +310,19 @@ final class BrigadierTrees {
 
     /**
      * Pull an argument out of the {@link CommandContext}, bridging Paper resolver
-     * types to their declared Bukkit equivalents.
+     * types to their declared Bukkit equivalents:
+     * <ul>
+     *     <li>{@code Player} / {@code Entity} → first resolved selector match (or null)</li>
+     *     <li>{@code List<Player>} / {@code List<Entity>} → full resolved list</li>
+     * </ul>
      */
     private static @Nullable Object resolveArgument(
             CommandContext<CommandSourceStack> ctx,
             String name,
-            Class<?> paramType
+            Parameter parameter
     ) throws CommandSyntaxException {
+        Class<?> paramType = parameter.getType();
+
         if (paramType.equals(Player.class)) {
             PlayerSelectorArgumentResolver resolver =
                     ctx.getArgument(name, PlayerSelectorArgumentResolver.class);
@@ -331,6 +335,22 @@ final class BrigadierTrees {
             List<Entity> resolved = resolver.resolve(ctx.getSource());
             return resolved.isEmpty() ? null : resolved.getFirst();
         }
+
+        // List<Player> / List<Entity> - return the full resolved list.
+        if (List.class.isAssignableFrom(paramType)) {
+            Class<?> element = ArgumentTypeInference.listElementType(parameter);
+            if (Player.class.equals(element)) {
+                PlayerSelectorArgumentResolver resolver =
+                        ctx.getArgument(name, PlayerSelectorArgumentResolver.class);
+                return resolver.resolve(ctx.getSource());
+            }
+            if (Entity.class.equals(element)) {
+                EntitySelectorArgumentResolver resolver =
+                        ctx.getArgument(name, EntitySelectorArgumentResolver.class);
+                return resolver.resolve(ctx.getSource());
+            }
+        }
+
         return ctx.getArgument(name, paramType);
     }
 
@@ -352,12 +372,12 @@ final class BrigadierTrees {
             return instantiateArgumentType(typeClass);
         }
 
-        ArgumentType<?> inferred = ArgumentTypeInference.infer(parameter.getType());
+        ArgumentType<?> inferred = ArgumentTypeInference.infer(parameter);
         if (inferred == null) {
             throw new IllegalStateException(
                     "Could not infer ArgumentType for parameter '" + arg.value() +
-                            "' of type " + parameter.getType().getName() +
-                            " — specify @Argument(type=...) or @Argument(provider=...)"
+                            "' of type " + parameter.getParameterizedType().getTypeName() +
+                            " - specify @Argument(type=...) or @Argument(provider=...)"
             );
         }
         return inferred;

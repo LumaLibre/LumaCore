@@ -12,7 +12,7 @@ import java.lang.annotation.Target;
  * as its first parameter. All subsequent parameters must be annotated with {@link Argument}
  * and will be resolved from the Brigadier {@code CommandContext} in declaration order.
  * <p>
- * Return type is ignored — execution always returns {@link com.mojang.brigadier.Command#SINGLE_SUCCESS}.
+ * Return type is ignored - execution always returns {@link com.mojang.brigadier.Command#SINGLE_SUCCESS}.
  * If you need richer control flow (Brigadier's int return), override
  * {@link dev.lumas.core.model.brigadier.BrigadierSubCommand#buildTree} directly instead
  * of using this annotation.

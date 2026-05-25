@@ -31,7 +31,11 @@ import org.bukkit.scoreboard.DisplaySlot;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
+import java.lang.reflect.Parameter;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Supplier;
@@ -41,27 +45,33 @@ import java.util.function.Supplier;
  * annotation-driven path of {@link BrigadierSubCommand}.
  * <p>
  * Paper resolver-returning arguments (e.g. {@link ArgumentTypes#player()},
- * {@link ArgumentTypes#entity()}) are bridged at invocation time by
+ * {@link ArgumentTypes#entity()}, {@link ArgumentTypes#players()},
+ * {@link ArgumentTypes#entities()}) are bridged at invocation time by
  * {@link BrigadierTrees}, so users can declare the Bukkit type directly on the
  * parameter.
  *
- * <h2>Types that need explicit opt-in</h2>
- * Some Paper argument types are intentionally NOT in the table because they would
- * be ambiguous or would surprise users:
+ * <h2>Selector inference</h2>
  * <ul>
- *     <li>{@link ArgumentTypes#players()} / {@link ArgumentTypes#entities()} 
- *         same Java return types as the singular variants. Use
- *         {@code @Argument(provider=...)} if you need the multi-selector.</li>
- *     <li>{@link ArgumentTypes#time()}  returns {@link Integer}, would silently
+ *     <li>{@code Player} → {@link ArgumentTypes#player()}, framework picks the
+ *         first resolved player (or {@code null} if the selector matches nothing).</li>
+ *     <li>{@code Entity} → {@link ArgumentTypes#entity()}, same first-match behavior.</li>
+ *     <li>{@code List<Player>} → {@link ArgumentTypes#players()}, framework returns
+ *         the full resolved list.</li>
+ *     <li>{@code List<Entity>} → {@link ArgumentTypes#entities()}, full resolved list.</li>
+ * </ul>
+ *
+ * <h2>Types that need explicit opt-in</h2>
+ * <ul>
+ *     <li>{@link ArgumentTypes#time()} - returns {@link Integer}, would silently
  *         turn every {@code int} parameter into a tick-parsing argument.</li>
  *     <li>{@link ArgumentTypes#resource(io.papermc.paper.registry.RegistryKey)} /
  *         {@link ArgumentTypes#resourceKey(io.papermc.paper.registry.RegistryKey)}
- *          require a registry key parameter, can't be no-args inferred.</li>
+ *         - require a registry key parameter, can't be no-args inferred.</li>
  *     <li>Position/rotation resolvers ({@code blockPosition()},
- *         {@code finePosition()}, {@code rotation()})  need
+ *         {@code finePosition()}, {@code rotation()}) - need
  *         {@code CommandSourceStack} to resolve and don't have a single canonical
  *         Java type.</li>
- *     <li>{@code signedMessage()}, {@code playerProfiles()}  non-trivial
+ *     <li>{@code signedMessage()}, {@code playerProfiles()} - non-trivial
  *         resolution models.</li>
  * </ul>
  */
@@ -122,8 +132,52 @@ final class ArgumentTypeInference {
 
     private ArgumentTypeInference() {}
 
-    static @Nullable ArgumentType<?> infer(Class<?> type) {
-        Supplier<ArgumentType<?>> supplier = MAPPINGS.get(type);
+    /**
+     * Infer an {@link ArgumentType} from a parameter's declared type, including
+     * generic specialization for {@code List<Player>} and {@code List<Entity>}.
+     *
+     * @return the inferred argument type, or {@code null} if no rule matches.
+     */
+    static @Nullable ArgumentType<?> infer(Parameter parameter) {
+        Class<?> raw = parameter.getType();
+
+        // Special-case parameterized list selectors before the raw map lookup.
+        if (List.class.isAssignableFrom(raw)) {
+            Class<?> element = listElementType(parameter);
+            if (element == null) {
+                return null;
+            }
+            if (Player.class.equals(element)) {
+                return ArgumentTypes.players();
+            }
+            if (Entity.class.equals(element)) {
+                return ArgumentTypes.entities();
+            }
+            return null;
+        }
+
+        Supplier<ArgumentType<?>> supplier = MAPPINGS.get(raw);
         return supplier != null ? supplier.get() : null;
+    }
+
+    /**
+     * @return the raw element type of {@code List<T>} parameter, or {@code null}
+     * if the parameter is a raw {@code List} or its type argument isn't resolvable
+     * to a {@link Class}.
+     */
+    static @Nullable Class<?> listElementType(Parameter parameter) {
+        Type generic = parameter.getParameterizedType();
+        if (!(generic instanceof ParameterizedType pt)) {
+            return null;
+        }
+        Type[] typeArgs = pt.getActualTypeArguments();
+        if (typeArgs.length != 1) {
+            return null;
+        }
+        Type arg = typeArgs[0];
+        if (arg instanceof Class<?> cls) {
+            return cls;
+        }
+        return null;
     }
 }

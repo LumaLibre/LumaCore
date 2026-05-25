@@ -6,7 +6,7 @@ import dev.lumas.core.model.internal.command.CommandAnnotation;
 import org.jspecify.annotations.NullMarked;
 
 /**
- * Internal marker for anything that exposes a {@link CommandAnnotation} —
+ * Internal marker for anything that exposes a {@link CommandAnnotation} -
  * implemented by both {@link BrigadierCommand} and {@link BrigadierSubCommand}
  * so BrigadierTrees can synthesize a tree for either.
  * <p>
