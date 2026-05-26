@@ -8,7 +8,6 @@ import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.command.brigadier.PaperBrigadier;
 import org.bukkit.entity.Player;
-import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.NullMarked;
 
 import java.util.LinkedHashMap;
@@ -38,7 +37,6 @@ public abstract class BrigadierCommandManager extends BrigadierCommand implement
         LiteralArgumentBuilder<CommandSourceStack> root = Commands.literal(meta().name());
         applyRequires(root);
 
-        // Let subclasses/annotations attach a root executor
         buildRootExecutor(root, commands);
 
         for (BrigadierSubCommand sub : subCommands.values()) {
@@ -55,7 +53,12 @@ public abstract class BrigadierCommandManager extends BrigadierCommand implement
         return root;
     }
 
-    protected void buildRootExecutor(LiteralArgumentBuilder<CommandSourceStack> root, Commands commands) {
+    /**
+     * Override to add custom logic to the root command.
+     * @param root the root command builder
+     * @param commands the command instance
+     */
+    public void buildRootExecutor(LiteralArgumentBuilder<CommandSourceStack> root, Commands commands) {
         // no-op by default
     }
 
@@ -77,7 +80,7 @@ public abstract class BrigadierCommandManager extends BrigadierCommand implement
         composeRequires(subRoot, sub.meta().permission(), sub.meta().playerOnly());
     }
 
-    private static void composeRequires(LiteralArgumentBuilder<CommandSourceStack> builder, String perm, boolean playerOnly) {
+    protected void composeRequires(LiteralArgumentBuilder<CommandSourceStack> builder, String perm, boolean playerOnly) {
         if (perm.isEmpty() && !playerOnly) {
             return;
         }
@@ -92,12 +95,12 @@ public abstract class BrigadierCommandManager extends BrigadierCommand implement
     }
 
     @Override
-    public void add(@NonNull BrigadierSubCommand instance) {
+    public void add(BrigadierSubCommand instance) {
         subCommands.put(instance.meta().name(), instance);
     }
 
     @Override
-    public void remove(@NonNull BrigadierSubCommand instance) {
+    public void remove(BrigadierSubCommand instance) {
         subCommands.remove(instance.meta().name());
     }
 }
