@@ -40,7 +40,7 @@ public abstract class BrigadierCommandManager<T extends BrigadierSubCommand> ext
         applyRequires(root);
 
         for (T sub : subCommands.values()) {
-            LiteralArgumentBuilder<CommandSourceStack> subTree = sub.buildTree(builder, commands);
+            LiteralArgumentBuilder<CommandSourceStack> subTree = sub.handleBuildTree(commands);
             applySubRequires(subTree, sub);
             LiteralCommandNode<CommandSourceStack> subNode = subTree.build();
             root.then(subNode);

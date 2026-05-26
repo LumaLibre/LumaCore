@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
  * Marks the executor method on a Brigadier subcommand when using the annotation-based API.
  * <p>
  * The annotated method must have {@code io.papermc.paper.command.brigadier.CommandSourceStack}
- * as its first parameter. All subsequent parameters must be annotated with {@link Argument}
+ * as its first parameter. All later parameters must be annotated with {@link Argument}
  * and will be resolved from the Brigadier {@code CommandContext} in declaration order.
  * <p>
  * Return type is ignored - execution always returns {@link com.mojang.brigadier.Command#SINGLE_SUCCESS}.
