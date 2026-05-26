@@ -16,8 +16,7 @@ import java.util.Map;
 import java.util.function.Predicate;
 
 /**
- * Base for Brigadier commands that act as a parent for subcommands. The default
- * {@link #buildTree(Commands)} implementation creates a root literal for this
+ * Base for Brigadier commands that act as a parent for subcommands.
  * command's name, applies its {@code permission}/{@code playerOnly} as a
  * {@code .requires(...)} predicate, then grafts each registered subcommand's
  * branch onto it. Aliases declared on each subcommand's {@code @CommandMeta}
@@ -27,9 +26,9 @@ import java.util.function.Predicate;
  * {@code @CommandMeta} and {@code @Register(Autowire.BRIGADIER)} is enough.
  */
 @NullMarked
-public abstract class BrigadierCommandManager<T extends BrigadierSubCommand> extends BrigadierCommand implements DelegateHolder<T>, BaseCommandManager {
+public abstract class BrigadierCommandManager extends BrigadierCommand implements DelegateHolder<BrigadierSubCommand>, BaseCommandManager {
 
-    protected final Map<String, T> subCommands = new LinkedHashMap<>();
+    protected final Map<String, BrigadierSubCommand> subCommands = new LinkedHashMap<>();
 
     protected BrigadierCommandManager() {
     }
@@ -39,7 +38,7 @@ public abstract class BrigadierCommandManager<T extends BrigadierSubCommand> ext
         LiteralArgumentBuilder<CommandSourceStack> root = Commands.literal(meta().name());
         applyRequires(root);
 
-        for (T sub : subCommands.values()) {
+        for (BrigadierSubCommand sub : subCommands.values()) {
             LiteralArgumentBuilder<CommandSourceStack> subTree = sub.handleBuildTree(commands);
             applySubRequires(subTree, sub);
             LiteralCommandNode<CommandSourceStack> subNode = subTree.build();
@@ -70,7 +69,7 @@ public abstract class BrigadierCommandManager<T extends BrigadierSubCommand> ext
      * predicate on its literal. Composes with any existing {@code requires(...)}
      * the subcommand declared via the DSL path. Override to add custom per-subcommand gating.
      */
-    protected void applySubRequires(LiteralArgumentBuilder<CommandSourceStack> subRoot, T sub) {
+    protected void applySubRequires(LiteralArgumentBuilder<CommandSourceStack> subRoot, BrigadierSubCommand sub) {
         composeRequires(subRoot, sub.meta().permission(), sub.meta().playerOnly());
     }
 
@@ -89,12 +88,12 @@ public abstract class BrigadierCommandManager<T extends BrigadierSubCommand> ext
     }
 
     @Override
-    public void add(@NonNull T instance) {
+    public void add(@NonNull BrigadierSubCommand instance) {
         subCommands.put(instance.meta().name(), instance);
     }
 
     @Override
-    public void remove(@NonNull T instance) {
+    public void remove(@NonNull BrigadierSubCommand instance) {
         subCommands.remove(instance.meta().name());
     }
 }
