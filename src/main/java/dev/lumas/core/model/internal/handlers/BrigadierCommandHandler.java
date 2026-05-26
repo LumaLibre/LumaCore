@@ -38,7 +38,7 @@ public class BrigadierCommandHandler implements RegisterHandler<Object> {
 
     /** Insertion-ordered so the COMMANDS lifecycle callback registers in declaration order. */
     private final Map<Class<? extends BrigadierCommand>, BrigadierCommand> commands = new LinkedHashMap<>();
-    private final List<BrigadierCommandManager<?>> managers = new ArrayList<>();
+    private final List<BrigadierCommandManager> managers = new ArrayList<>();
     private final BrigadierSubCommandHandler subHandler = new BrigadierSubCommandHandler(this);
     private boolean lifecycleRegistered = false;
 
@@ -60,7 +60,7 @@ public class BrigadierCommandHandler implements RegisterHandler<Object> {
             );
         }
         commands.put(command.getClass(), command);
-        if (command instanceof BrigadierCommandManager<?> manager) {
+        if (command instanceof BrigadierCommandManager manager) {
             managers.add(manager);
         }
         ensureLifecycleRegistered(ctx);
@@ -87,7 +87,7 @@ public class BrigadierCommandHandler implements RegisterHandler<Object> {
             return;
         }
         commands.remove(command.getClass());
-        if (command instanceof BrigadierCommandManager<?> manager) {
+        if (command instanceof BrigadierCommandManager manager) {
             managers.remove(manager);
         }
 
@@ -114,7 +114,7 @@ public class BrigadierCommandHandler implements RegisterHandler<Object> {
         subHandler.postProcess(context);
     }
 
-    public List<BrigadierCommandManager<?>> managers() {
+    public List<BrigadierCommandManager> managers() {
         return managers;
     }
 
