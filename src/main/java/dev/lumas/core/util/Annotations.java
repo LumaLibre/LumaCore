@@ -10,7 +10,7 @@ import dev.lumas.core.model.internal.command.CommandMetaHolder;
 import dev.lumas.core.model.internal.placeholder.PlaceholderAnnotation;
 import dev.lumas.core.model.internal.placeholder.PlaceholderInfoHolder;
 import dev.lumas.core.model.internal.placeholder.PlaceholderMetaHolder;
-import dev.lumas.core.model.internal.register.AutoRegisterAnnotation;
+import dev.lumas.core.model.internal.register.AutoRegisterHolder;
 import dev.lumas.core.model.internal.register.RegisterAnnotation;
 import dev.lumas.core.model.internal.register.RegisterHolder;
 import dev.lumas.lumacore.manager.commands.CommandInfo;
@@ -77,7 +77,7 @@ public final class Annotations {
 
         AutoRegister autoRegister = clazz.getAnnotation(AutoRegister.class);
         if (autoRegister != null) {
-            return new AutoRegisterAnnotation(autoRegister);
+            return new AutoRegisterHolder(autoRegister);
         }
         return null;
     }

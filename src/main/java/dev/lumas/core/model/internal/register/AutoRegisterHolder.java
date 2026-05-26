@@ -8,7 +8,7 @@ import org.jspecify.annotations.NullMarked;
 import java.util.Arrays;
 
 @NullMarked
-public record AutoRegisterAnnotation(AutoRegister handle) implements RegisterAnnotation {
+public record AutoRegisterHolder(AutoRegister handle) implements RegisterAnnotation {
     @Override
     public Autowire[] value() {
         return Arrays.stream(handle.value()).map(RegisterType::toNewHandle)

@@ -1,5 +1,6 @@
 package dev.lumas.core.model;
 
+import dev.lumas.core.LumaCore;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.ApiStatus;
@@ -37,9 +38,11 @@ public record ModuleContext(Plugin plugin, String fallbackPrefix) {
             return this == RELOAD;
         }
 
-        // Good enough for what we need
         public static LoadType determine() {
-            return Bukkit.getOnlinePlayers().isEmpty() ? STARTUP : RELOAD;
+            if (LumaCore.isStarted() || !Bukkit.getOnlinePlayers().isEmpty()) {
+                return RELOAD;
+            }
+            return STARTUP;
         }
     }
 }

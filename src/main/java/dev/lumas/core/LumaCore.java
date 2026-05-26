@@ -11,20 +11,22 @@ public final class LumaCore extends JavaPlugin {
     @Getter
     private static LumaCore instance;
     @Getter
-    private static boolean withPlaceholderAPI;
+    private static boolean placeholderAPI;
+    @Getter
+    private static boolean started;
     @Getter
     private static boolean stopping;
 
     @Override
     public void onLoad() {
         instance = this;
-        withPlaceholderAPI = getServer().getPluginManager().getPlugin("PlaceholderAPI") != null;
+        placeholderAPI = getServer().getPluginManager().getPlugin("PlaceholderAPI") != null;
     }
 
     @Override
     public void onEnable() {
-        // Not worth using a module manager for this
         getServer().getPluginManager().registerEvents(new GuiListeners(), this);
+        getServer().getGlobalRegionScheduler().run(this, _ -> started = true);
     }
 
 

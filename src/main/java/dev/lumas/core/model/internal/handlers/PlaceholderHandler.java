@@ -22,21 +22,22 @@ public class PlaceholderHandler implements RegisterHandler<Object> {
 
     @Override
     public void register(Object instance, ModuleContext ctx) {
-        if (!LumaCore.isWithPlaceholderAPI()) return;
+        if (!LumaCore.isPlaceholderAPI()) return;
 
-        if (instance instanceof AbstractPlaceholderManager<?, ?> manager) {
-            manager.register();
-            managers.put(manager, new ArrayList<>());
-        } else if (instance instanceof SoloAbstractPlaceholder solo) {
-            solo.register(); // register and forget
-        } else if (instance instanceof AbstractPlaceholder<?> placeholder) {
-            queuedPlaceholders.add(placeholder);
+        switch (instance) {
+            case AbstractPlaceholderManager<?, ?> manager -> {
+                manager.register();
+                managers.put(manager, new ArrayList<>());
+            }
+            case SoloAbstractPlaceholder solo -> solo.register(); // register and forget
+            case AbstractPlaceholder<?> placeholder -> queuedPlaceholders.add(placeholder);
+            default -> {}
         }
     }
 
     @Override
     public void unregister(Object instance, ModuleContext ctx) {
-        if (!LumaCore.isWithPlaceholderAPI()) return;
+        if (!LumaCore.isPlaceholderAPI()) return;
 
         if (instance instanceof SoloAbstractPlaceholder solo) {
             solo.unregister();

@@ -4,9 +4,11 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import dev.lumas.core.model.DelegateHolder;
 import dev.lumas.core.model.command.BaseCommandManager;
+import dev.lumas.core.model.internal.command.CommandAnnotation;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.command.brigadier.PaperBrigadier;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jspecify.annotations.NullMarked;
 
@@ -77,7 +79,8 @@ public abstract class BrigadierCommandManager extends BrigadierCommand implement
      * the subcommand declared via the DSL path. Override to add custom per-subcommand gating.
      */
     protected void applySubRequires(LiteralArgumentBuilder<CommandSourceStack> subRoot, BrigadierSubCommand sub) {
-        composeRequires(subRoot, sub.meta().permission(), sub.meta().playerOnly());
+        CommandAnnotation meta = sub.meta();
+        composeRequires(subRoot, meta.permission(), meta.playerOnly());
     }
 
     protected void composeRequires(LiteralArgumentBuilder<CommandSourceStack> builder, String perm, boolean playerOnly) {
@@ -86,10 +89,11 @@ public abstract class BrigadierCommandManager extends BrigadierCommand implement
         }
         Predicate<CommandSourceStack> existing = builder.getRequirement();
         Predicate<CommandSourceStack> gate = src -> {
-            if (playerOnly && !(src.getSender() instanceof Player)) {
+            CommandSender sender = src.getSender();
+            if (playerOnly && !(sender instanceof Player)) {
                 return false;
             }
-            return perm.isEmpty() || src.getSender().hasPermission(perm);
+            return perm.isEmpty() || sender.hasPermission(perm);
         };
         builder.requires(existing == null ? gate : gate.and(existing));
     }

@@ -9,8 +9,7 @@ import dev.lumas.core.model.internal.command.CommandAnnotation;
 import dev.lumas.core.util.Annotations;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
+import org.jetbrains.annotations.ApiStatus;
 import org.jspecify.annotations.NullMarked;
 
 /**
@@ -40,17 +39,10 @@ public interface BrigadierSubCommand extends MetaHolder {
      * {@link #buildTree(LiteralArgumentBuilder, Commands)} for the user's
      * argument structure.
      */
+    @ApiStatus.NonExtendable
     default LiteralArgumentBuilder<CommandSourceStack> handleBuildTree(Commands commands) {
-        CommandAnnotation m = meta();
-        LiteralArgumentBuilder<CommandSourceStack> root = Commands.literal(m.name())
-                .requires(src -> {
-                    CommandSender sender = src.getSender();
-                    String perm = m.permission();
-                    if (m.playerOnly() && !(sender instanceof Player)) {
-                        return false;
-                    }
-                    return perm.isEmpty() || sender.hasPermission(perm);
-                });
+        CommandAnnotation meta = meta();
+        LiteralArgumentBuilder<CommandSourceStack> root = Commands.literal(meta.name());
         return buildTree(root, commands);
     }
 
@@ -73,9 +65,5 @@ public interface BrigadierSubCommand extends MetaHolder {
             throw new IllegalStateException("@CommandMeta annotation not found on " + getClass().getName());
         }
         return info;
-    }
-
-    default String name() {
-        return meta().name();
     }
 }
