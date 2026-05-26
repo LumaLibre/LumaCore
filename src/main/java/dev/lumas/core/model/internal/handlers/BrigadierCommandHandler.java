@@ -34,7 +34,6 @@ import java.util.Map;
  * covers both top-level commands and subcommands.
  */
 @NullMarked
-@SuppressWarnings("UnstableApiUsage")
 public class BrigadierCommandHandler implements RegisterHandler<Object> {
 
     /** Insertion-ordered so the COMMANDS lifecycle callback registers in declaration order. */

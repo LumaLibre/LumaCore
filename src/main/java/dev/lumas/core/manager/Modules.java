@@ -5,7 +5,6 @@ import dev.lumas.core.annotation.Provided;
 import dev.lumas.core.model.ModuleContext;
 import dev.lumas.core.model.internal.RegisterHandler;
 import dev.lumas.core.model.internal.handlers.BrigadierCommandHandler;
-import dev.lumas.core.model.internal.handlers.BrigadierSubCommandHandler;
 import dev.lumas.core.model.internal.handlers.CommandHandler;
 import dev.lumas.core.model.internal.handlers.ListenerHandler;
 import dev.lumas.core.model.internal.handlers.PlaceholderHandler;
@@ -17,6 +16,7 @@ import dev.lumas.core.util.Logging;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.ApiStatus;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
@@ -170,12 +170,13 @@ public class Modules {
      * @return the resolved instance, or {@code null} if a declared singleton field was unusable
      * @throws ReflectiveOperationException if constructor invocation fails
      */
-    private @Nullable Object resolveInstance(Class<?> aClass) throws ReflectiveOperationException {
+    @ApiStatus.Internal
+    public static @Nullable Object resolveInstance(Class<?> aClass) throws ReflectiveOperationException {
         Provided provided = Annotations.getProvidedAnnotation(aClass);
         if (provided != null) {
             Object instance = readStaticField(aClass, provided.value());
             if (instance == null) {
-                Logging.warningLog("@Singleton class " + aClass.getCanonicalName() + " has no usable static field '" + provided.value() + "'");
+                Logging.warningLog("@Provided class " + aClass.getCanonicalName() + " has no usable static field '" + provided.value() + "'");
             }
             return instance;
         }
@@ -196,7 +197,7 @@ public class Modules {
      * Attempts to read a static field of the given name whose type is assignable to the declaring class.
      * Returns null if the field doesn't exist, isn't static, or is of an incompatible type.
      */
-    private @Nullable Object readStaticField(Class<?> aClass, String fieldName) {
+    private static @Nullable Object readStaticField(Class<?> aClass, String fieldName) {
         try {
             Field field = aClass.getDeclaredField(fieldName);
             if (!Modifier.isStatic(field.getModifiers()) || !aClass.isAssignableFrom(field.getType()))  {

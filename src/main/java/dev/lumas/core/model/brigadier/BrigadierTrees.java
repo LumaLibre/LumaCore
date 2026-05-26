@@ -13,6 +13,7 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import dev.lumas.core.annotation.Argument;
 import dev.lumas.core.annotation.BrigadierExecutor;
 import dev.lumas.core.annotation.Suggests;
+import dev.lumas.core.manager.Modules;
 import dev.lumas.core.model.MetaHolder;
 import dev.lumas.core.util.Logging;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
@@ -25,7 +26,6 @@ import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -383,24 +383,15 @@ final class BrigadierTrees {
 
     private static ArgumentType<?> instantiateArgumentType(Class<? extends ArgumentType<?>> typeClass) {
         try {
-            var field = typeClass.getDeclaredField("INSTANCE");
-            if (Modifier.isStatic(field.getModifiers()) && typeClass.isAssignableFrom(field.getType())) {
-                field.setAccessible(true);
-                Object value = field.get(null);
-                if (value instanceof ArgumentType<?> at) {
-                    return at;
-                }
+            ArgumentType<?> resolved = (ArgumentType<?>) Modules.resolveInstance(typeClass);
+            if (resolved != null) {
+                return resolved;
             }
-        } catch (NoSuchFieldException | IllegalAccessException ignored) {
-            // fall through to constructor
-        }
-
-        try {
             return typeClass.getDeclaredConstructor().newInstance();
         } catch (ReflectiveOperationException e) {
             throw new IllegalStateException(
                     "Failed to instantiate ArgumentType " + typeClass.getName() +
-                            ", provide a public no-args constructor or a public static INSTANCE field, " +
+                            ", provide a public no-args constructor or an @Provided annotation, " +
                             "or use @Argument(provider=...) instead",
                     e
             );
