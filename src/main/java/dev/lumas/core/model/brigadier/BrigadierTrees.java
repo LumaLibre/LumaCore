@@ -302,8 +302,7 @@ final class BrigadierTrees {
                 if (cause instanceof CommandSyntaxException cse) {
                     throw cse;
                 }
-                Logging.errorLog("Failed to invoke @BrigadierExecutor on " + holder.getClass().getName(), cause);
-                return 0;
+                throw new RuntimeException(cause);
             }
         };
     }
