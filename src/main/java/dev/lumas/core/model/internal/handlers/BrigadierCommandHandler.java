@@ -64,17 +64,6 @@ public class BrigadierCommandHandler implements RegisterHandler<Object> {
             managers.add(manager);
         }
         ensureLifecycleRegistered(ctx);
-
-        if (ModuleContext.LoadType.determine().isReload()) {
-            try {
-                Bukkit.getGlobalRegionScheduler().runDelayed(ctx.plugin(), task -> {
-                    refreshCommandTree();
-                    Logging.log("Finished reloading command tree (ctx: " + ctx.plugin().getName() + ").");
-                }, 30);
-            } catch (Throwable t) {
-                Logging.errorLog("Failed to schedule command tree refresh (plugin disabled?)", t);
-            }
-        }
     }
 
     @Override
@@ -108,10 +97,21 @@ public class BrigadierCommandHandler implements RegisterHandler<Object> {
     }
 
     @Override
-    public void postProcess(ModuleContext context) {
+    public void postProcess(ModuleContext ctx) {
         // Top-level commands are registered inside the COMMANDS lifecycle callback,
         // not here. The sub handler still needs its postProcess to resolve parents.
-        subHandler.postProcess(context);
+        subHandler.postProcess(ctx);
+
+        if (ModuleContext.LoadType.determine().isReload()) {
+            try {
+                Bukkit.getGlobalRegionScheduler().runDelayed(ctx.plugin(), task -> {
+                    refreshCommandTree();
+                    Logging.log("Finished reloading command tree (ctx: " + ctx.plugin().getName() + ").");
+                }, 30);
+            } catch (Throwable t) {
+                Logging.errorLog("Failed to schedule command tree refresh (plugin disabled?)", t);
+            }
+        }
     }
 
     public List<BrigadierCommandManager> managers() {
