@@ -56,7 +56,7 @@ public abstract class BrigadierCommand implements MetaHolder {
      * permission/sender checks, then delegates to {@link #buildTree} for
      * the command's actual argument structure.
      */
-    public LiteralArgumentBuilder<CommandSourceStack> handleBuildTree(Commands commands) throws CommandSyntaxException {
+    public final LiteralArgumentBuilder<CommandSourceStack> handleBuildTree(Commands commands) {
         LiteralArgumentBuilder<CommandSourceStack> cmd = Commands.literal(meta.name())
                 .requires(src -> {
                     if (meta.playerOnly() && !(src.getSender() instanceof Player)) {

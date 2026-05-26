@@ -37,7 +37,7 @@ public interface BrigadierSubCommand extends MetaHolder {
      * The default implementation synthesizes a tree from a {@link BrigadierExecutor}
      * annotated method on this class; override to declare the tree explicitly.
      */
-    default LiteralArgumentBuilder<CommandSourceStack> buildTree(Commands commands) {
+    default LiteralArgumentBuilder<CommandSourceStack> buildTree(LiteralArgumentBuilder<CommandSourceStack> builder, Commands commands) {
         return BrigadierTrees.buildAnnotatedTree(this);
     }
 

@@ -35,12 +35,12 @@ public abstract class BrigadierCommandManager<T extends BrigadierSubCommand> ext
     }
 
     @Override
-    public LiteralArgumentBuilder<CommandSourceStack> handleBuildTree(Commands commands) {
+    public LiteralArgumentBuilder<CommandSourceStack> buildTree(LiteralArgumentBuilder<CommandSourceStack> builder, Commands commands) {
         LiteralArgumentBuilder<CommandSourceStack> root = Commands.literal(meta().name());
         applyRequires(root);
 
         for (T sub : subCommands.values()) {
-            LiteralArgumentBuilder<CommandSourceStack> subTree = sub.buildTree(commands);
+            LiteralArgumentBuilder<CommandSourceStack> subTree = sub.buildTree(builder, commands);
             applySubRequires(subTree, sub);
             LiteralCommandNode<CommandSourceStack> subNode = subTree.build();
             root.then(subNode);
@@ -53,7 +53,6 @@ public abstract class BrigadierCommandManager<T extends BrigadierSubCommand> ext
                 root.then(PaperBrigadier.copyLiteral(alias, subNode));
             }
         }
-
         return root;
     }
 
