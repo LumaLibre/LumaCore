@@ -38,21 +38,25 @@ public abstract class BrigadierCommandManager extends BrigadierCommand implement
         LiteralArgumentBuilder<CommandSourceStack> root = Commands.literal(meta().name());
         applyRequires(root);
 
+        // Let subclasses/annotations attach a root executor
+        buildRootExecutor(root, commands);
+
         for (BrigadierSubCommand sub : subCommands.values()) {
             LiteralArgumentBuilder<CommandSourceStack> subTree = sub.handleBuildTree(commands);
             applySubRequires(subTree, sub);
             LiteralCommandNode<CommandSourceStack> subNode = subTree.build();
             root.then(subNode);
 
-
             for (String alias : sub.meta().aliases()) {
-                if (alias.isEmpty() || alias.equals(sub.meta().name())) {
-                    continue;
-                }
+                if (alias.isEmpty() || alias.equals(sub.meta().name())) continue;
                 root.then(PaperBrigadier.copyLiteral(alias, subNode));
             }
         }
         return root;
+    }
+
+    protected void buildRootExecutor(LiteralArgumentBuilder<CommandSourceStack> root, Commands commands) {
+        // no-op by default
     }
 
     /**
