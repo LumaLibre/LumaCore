@@ -1,6 +1,9 @@
 package dev.lumas.core.model.brigadier;
 
+import com.mojang.brigadier.LiteralMessage;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import dev.lumas.core.annotation.CommandMeta;
 import dev.lumas.core.annotation.Argument;
 import dev.lumas.core.annotation.BrigadierExecutor;
@@ -9,6 +12,7 @@ import dev.lumas.core.model.internal.command.CommandAnnotation;
 import dev.lumas.core.util.Annotations;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
+import org.bukkit.entity.Player;
 import org.jspecify.annotations.NullMarked;
 
 /**
@@ -35,7 +39,6 @@ import org.jspecify.annotations.NullMarked;
  * registration framework; subclasses do not need to repeat them.
  */
 @NullMarked
-@SuppressWarnings("UnstableApiUsage")
 public abstract class BrigadierCommand implements MetaHolder {
 
     private final CommandAnnotation meta;
@@ -49,11 +52,31 @@ public abstract class BrigadierCommand implements MetaHolder {
     }
 
     /**
-     * Build the argument tree for this command. The default implementation
-     * synthesizes a tree from a {@link BrigadierExecutor}-annotated method on
-     * this class; override to declare the tree explicitly.
+     * Build the argument tree for this command. Sets up the root literal with
+     * permission/sender checks, then delegates to {@link #buildTree} for
+     * the command's actual argument structure.
      */
-    public LiteralArgumentBuilder<CommandSourceStack> buildTree(Commands commands) {
+    public LiteralArgumentBuilder<CommandSourceStack> handleBuildTree(Commands commands) throws CommandSyntaxException {
+        LiteralArgumentBuilder<CommandSourceStack> cmd = Commands.literal(meta.name())
+                .requires(src -> {
+                    if (meta.playerOnly() && !(src.getSender() instanceof Player)) {
+                        return false;
+                    }
+                    return meta.permission().isEmpty() || src.getSender().hasPermission(meta.permission());
+                });
+
+        return buildTree(cmd, commands);
+    }
+
+    /**
+     * Extend the command tree. The default implementation synthesizes a tree
+     * from a {@link BrigadierExecutor}-annotated method on this class; override
+     * to declare the tree explicitly using the provided {@code builder}.
+     *
+     * @param builder the root literal, pre-configured with permission/sender requirements
+     * @param commands the Commands context for building argument nodes
+     */
+    public LiteralArgumentBuilder<CommandSourceStack> buildTree(LiteralArgumentBuilder<CommandSourceStack> builder, Commands commands) {
         return BrigadierTrees.buildAnnotatedTree(this);
     }
 

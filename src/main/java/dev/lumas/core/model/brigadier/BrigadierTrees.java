@@ -45,7 +45,6 @@ import java.util.concurrent.CompletableFuture;
  * tab-completion suppliers via {@link Suggests @Suggests} methods on the same class.
  */
 @NullMarked
-@SuppressWarnings("UnstableApiUsage")
 final class BrigadierTrees {
 
     private BrigadierTrees() {}

@@ -1,10 +1,12 @@
 package dev.lumas.core.model.brigadier;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.tree.LiteralCommandNode;
 import dev.lumas.core.model.DelegateHolder;
 import dev.lumas.core.model.command.BaseCommandManager;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
+import io.papermc.paper.command.brigadier.PaperBrigadier;
 import org.bukkit.entity.Player;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.NullMarked;
@@ -18,13 +20,13 @@ import java.util.function.Predicate;
  * {@link #buildTree(Commands)} implementation creates a root literal for this
  * command's name, applies its {@code permission}/{@code playerOnly} as a
  * {@code .requires(...)} predicate, then grafts each registered subcommand's
- * branch onto it.
+ * branch onto it. Aliases declared on each subcommand's {@code @CommandMeta}
+ * are grafted as additional literal nodes via {@link PaperBrigadier#copyLiteral}.
  * <p>
- * Subclasses generally don't need to override anything  declaring the class with
+ * Subclasses generally don't need to override anything — declaring the class with
  * {@code @CommandMeta} and {@code @Register(Autowire.BRIGADIER)} is enough.
  */
 @NullMarked
-@SuppressWarnings("UnstableApiUsage")
 public abstract class BrigadierCommandManager<T extends BrigadierSubCommand> extends BrigadierCommand implements DelegateHolder<T>, BaseCommandManager {
 
     protected final Map<String, T> subCommands = new LinkedHashMap<>();
@@ -33,14 +35,23 @@ public abstract class BrigadierCommandManager<T extends BrigadierSubCommand> ext
     }
 
     @Override
-    public LiteralArgumentBuilder<CommandSourceStack> buildTree(Commands commands) {
+    public LiteralArgumentBuilder<CommandSourceStack> handleBuildTree(Commands commands) {
         LiteralArgumentBuilder<CommandSourceStack> root = Commands.literal(meta().name());
         applyRequires(root);
 
         for (T sub : subCommands.values()) {
             LiteralArgumentBuilder<CommandSourceStack> subTree = sub.buildTree(commands);
             applySubRequires(subTree, sub);
-            root.then(subTree.build());
+            LiteralCommandNode<CommandSourceStack> subNode = subTree.build();
+            root.then(subNode);
+
+
+            for (String alias : sub.meta().aliases()) {
+                if (alias.isEmpty() || alias.equals(sub.meta().name())) {
+                    continue;
+                }
+                root.then(PaperBrigadier.copyLiteral(alias, subNode));
+            }
         }
 
         return root;
@@ -64,11 +75,7 @@ public abstract class BrigadierCommandManager<T extends BrigadierSubCommand> ext
         composeRequires(subRoot, sub.meta().permission(), sub.meta().playerOnly());
     }
 
-    private static void composeRequires(
-            LiteralArgumentBuilder<CommandSourceStack> builder,
-            String perm,
-            boolean playerOnly
-    ) {
+    private static void composeRequires(LiteralArgumentBuilder<CommandSourceStack> builder, String perm, boolean playerOnly) {
         if (perm.isEmpty() && !playerOnly) {
             return;
         }
@@ -82,11 +89,6 @@ public abstract class BrigadierCommandManager<T extends BrigadierSubCommand> ext
         builder.requires(existing == null ? gate : gate.and(existing));
     }
 
-    /**
-     * Registers a subcommand by its primary name.
-     * Brigadier aliases (if any) are added at the tree level by the framework  not duplicated here.
-     * {@inheritDoc}
-     */
     @Override
     public void add(@NonNull T instance) {
         subCommands.put(instance.meta().name(), instance);

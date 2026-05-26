@@ -133,7 +133,7 @@ public class BrigadierCommandHandler implements RegisterHandler<Object> {
             Commands registrar = event.registrar();
             for (BrigadierCommand command : commands.values()) {
                 try {
-                    LiteralCommandNode<CommandSourceStack> node = command.buildTree(registrar).build();
+                    LiteralCommandNode<CommandSourceStack> node = command.handleBuildTree(registrar).build();
                     List<String> aliases = Arrays.asList(command.aliases());
                     String description = command.description();
 

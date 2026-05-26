@@ -30,12 +30,11 @@ import org.jspecify.annotations.NullMarked;
  * {@code meta().permission()}. The framework reads these at registration time.
  */
 @NullMarked
-@SuppressWarnings("UnstableApiUsage")
 public interface BrigadierSubCommand extends MetaHolder {
 
     /**
      * Build this subcommand's argument tree, rooted at {@code commands.literal(meta().name())}.
-     * The default implementation synthesizes a tree from a {@link BrigadierExecutor}-
+     * The default implementation synthesizes a tree from a {@link BrigadierExecutor}
      * annotated method on this class; override to declare the tree explicitly.
      */
     default LiteralArgumentBuilder<CommandSourceStack> buildTree(Commands commands) {
