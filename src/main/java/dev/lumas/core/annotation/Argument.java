@@ -18,11 +18,7 @@ import java.lang.annotation.Target;
  *     <li>Otherwise if {@link #type()} is set (non-default), instantiate the
  *         {@link ArgumentType} via its public static {@code INSTANCE} field
  *         (if any) or its no-args constructor.</li>
- *     <li>Otherwise infer from the parameter's Java type. Supported inferred types:
- *         {@code int}/{@code Integer}, {@code long}/{@code Long},
- *         {@code float}/{@code Float}, {@code double}/{@code Double},
- *         {@code boolean}/{@code Boolean}, {@code String} (single word),
- *         {@code Player}, {@code World}, {@code net.kyori.adventure.key.Key}.</li>
+ *     <li>Otherwise infer from the parameter's type.
  * </ol>
  * <p>
  * A custom {@link ArgumentTypeProvider} is the right choice whenever the argument type

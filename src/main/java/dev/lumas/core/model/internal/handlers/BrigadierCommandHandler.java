@@ -102,7 +102,7 @@ public class BrigadierCommandHandler implements RegisterHandler<Object> {
         // not here. The sub handler still needs its postProcess to resolve parents.
         subHandler.postProcess(ctx);
 
-        if (ModuleContext.LoadType.determine().isReload()) {
+        if (ModuleContext.LoadType.determine().isReload() && !commands.isEmpty()) {
             try {
                 Bukkit.getGlobalRegionScheduler().runDelayed(ctx.plugin(), task -> {
                     refreshCommandTree();
