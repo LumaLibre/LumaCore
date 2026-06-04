@@ -11,12 +11,15 @@ import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.command.brigadier.PaperBrigadier;
 import io.papermc.paper.command.brigadier.PaperCommands;
+import io.papermc.paper.event.server.ServerResourcesReloadedEvent;
+import io.papermc.paper.plugin.bootstrap.BootstrapContext;
 import io.papermc.paper.plugin.lifecycle.event.LifecycleEventManager;
 import io.papermc.paper.plugin.lifecycle.event.LifecycleEventRunner;
 import io.papermc.paper.plugin.lifecycle.event.registrar.ReloadableRegistrarEvent;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.CraftServer;
+import org.bukkit.craftbukkit.help.SimpleHelpMap;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jspecify.annotations.NullMarked;
@@ -56,7 +59,7 @@ public class BrigadierCommandHandler implements RegisterHandler<Object> {
         if (!(instance instanceof BrigadierCommand command)) {
             // accepts() should prevent this; defensive guard.
             throw new IllegalArgumentException(
-                    "BrigadierCommandHandler received unsupported type: " + instance.getClass().getName()
+                "BrigadierCommandHandler received unsupported type: " + instance.getClass().getName()
             );
         }
         commands.put(command.getClass(), command);
@@ -148,17 +151,18 @@ public class BrigadierCommandHandler implements RegisterHandler<Object> {
     private void refreshCommandTree() {
         try {
             net.minecraft.server.MinecraftServer server = ((CraftServer) Bukkit.getServer()).getServer();
+            CraftServer craftServer = server.server;
             net.minecraft.server.ReloadableServerResources resources = server.resources.managers();
             net.minecraft.commands.Commands oldCommands = resources.getCommands();
 
             // build fresh new contexts
             net.minecraft.commands.CommandBuildContext buildContext = net.minecraft.commands.CommandBuildContext.simple(
-                    server.registryAccess(),
-                    server.getWorldData().enabledFeatures()
+                server.registryAccess(),
+                server.getWorldData().enabledFeatures()
             );
             net.minecraft.commands.Commands.CommandSelection selection = server.isDedicatedServer()
-                    ? net.minecraft.commands.Commands.CommandSelection.DEDICATED
-                    : net.minecraft.commands.Commands.CommandSelection.INTEGRATED;
+                ? net.minecraft.commands.Commands.CommandSelection.DEDICATED
+                : net.minecraft.commands.Commands.CommandSelection.INTEGRATED;
             net.minecraft.commands.Commands freshCommands = new net.minecraft.commands.Commands(selection, buildContext, true);
 
             PaperCommands.INSTANCE.setDispatcher(freshCommands, buildContext);
@@ -166,15 +170,50 @@ public class BrigadierCommandHandler implements RegisterHandler<Object> {
             PaperBrigadier.moveBukkitCommands(oldCommands, freshCommands);
             resources.commands = freshCommands;
 
-            PaperCommands.INSTANCE.setValid();
-            LifecycleEventRunner.INSTANCE.callReloadableRegistrarEvent(
+            try {
+                PaperCommands.INSTANCE.setValid();
+                LifecycleEventRunner.INSTANCE.callReloadableRegistrarEvent(
+                    LifecycleEvents.COMMANDS,
+                    PaperCommands.INSTANCE,
+                    BootstrapContext.class,
+                    ReloadableRegistrarEvent.Cause.RELOAD
+                );
+            } catch (Throwable t) {
+                Logging.errorLog("refreshCommandTree: bootstrap-context COMMANDS dispatch failed", t);
+            }
+            try {
+                PaperCommands.INSTANCE.setValid();
+                LifecycleEventRunner.INSTANCE.callReloadableRegistrarEvent(
                     LifecycleEvents.COMMANDS,
                     PaperCommands.INSTANCE,
                     Plugin.class,
                     ReloadableRegistrarEvent.Cause.RELOAD
-            );
+                );
+            } catch (Throwable t) {
+                Logging.errorLog("refreshCommandTree: plugin-context COMMANDS dispatch failed", t);
+            }
 
+            try {
+                SimpleHelpMap helpMap = (SimpleHelpMap) craftServer.getHelpMap();
+                helpMap.clear();
+                helpMap.initializeGeneralTopics();
+                helpMap.initializeCommands();
+            } catch (Throwable t) {
+                Logging.errorLog("refreshCommandTree: help map rebuild failed", t);
+            }
 
+            // Sync Bukkit's CommandMap with the dispatcher
+            try {
+                craftServer.syncCommands();
+            } catch (Throwable t) {
+                Logging.errorLog("refreshCommandTree: syncCommands failed", t);
+            }
+
+            try {
+                new ServerResourcesReloadedEvent(ServerResourcesReloadedEvent.Cause.PLUGIN).callEvent();
+            } catch (Throwable t) {
+                Logging.errorLog("refreshCommandTree: ServerResourcesReloadedEvent dispatch failed", t);
+            }
 
             for (net.minecraft.server.level.ServerPlayer player : server.getPlayerList().getPlayers()) {
                 if (server.getPlayerList().isOp(player.nameAndId())) {
