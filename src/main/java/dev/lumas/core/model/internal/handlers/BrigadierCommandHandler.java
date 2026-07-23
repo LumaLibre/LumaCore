@@ -24,6 +24,7 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jspecify.annotations.NullMarked;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -152,8 +153,17 @@ public class BrigadierCommandHandler implements RegisterHandler<Object> {
         try {
             net.minecraft.server.MinecraftServer server = ((CraftServer) Bukkit.getServer()).getServer();
             CraftServer craftServer = server.server;
-            net.minecraft.server.ReloadableServerResources resources = server.resources.managers();
-            net.minecraft.commands.Commands oldCommands = resources.getCommands();
+            net.minecraft.server.ReloadableServerResources resources;
+            try {
+                //server.resources.managers();
+                Field field = net.minecraft.server.MinecraftServer.class.getDeclaredField("resources");
+                field.setAccessible(true);
+                resources = (net.minecraft.server.ReloadableServerResources) field.get(server);
+            } catch (Throwable t) {
+                Logging.errorLog("refreshCommandTree: failed to get resources", t);
+                return;
+            }
+            net.minecraft.commands.Commands oldCommands = server.getCommands();
 
             // build fresh new contexts
             net.minecraft.commands.CommandBuildContext buildContext = net.minecraft.commands.CommandBuildContext.simple(
@@ -168,7 +178,14 @@ public class BrigadierCommandHandler implements RegisterHandler<Object> {
             PaperCommands.INSTANCE.setDispatcher(freshCommands, buildContext);
             io.papermc.paper.command.PaperCommands.registerCommands();
             PaperBrigadier.moveBukkitCommands(oldCommands, freshCommands);
-            resources.commands = freshCommands;
+            try {
+                Field field = net.minecraft.server.ReloadableServerResources.class.getDeclaredField("commands");
+                field.setAccessible(true);
+                field.set(resources, freshCommands);
+            } catch (Throwable t) {
+                Logging.errorLog("refreshCommandTree: failed to set commands", t);
+                return;
+            }
 
             try {
                 PaperCommands.INSTANCE.setValid();

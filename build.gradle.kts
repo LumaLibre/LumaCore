@@ -18,7 +18,7 @@ repositories {
 }
 
 dependencies {
-    paperweight.paperDevBundle("1.21.11-R0.1-SNAPSHOT")
+    paperweight.paperDevBundle("26.2.build.+")
     compileOnly("me.clip:placeholderapi:2.12.2")
 }
 
